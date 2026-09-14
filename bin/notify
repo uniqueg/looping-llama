@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/loop"
+CONFIG_FILE="$CONFIG_HOME/config.toml"
+
+TITLE="Looping Llama"
+MESSAGE=""
+PRIORITY="default"
+TAGS="llama"
+CLICK_URL=""
+SCOPE_NAME=""
+
+# Parse flags
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --priority|-p)
+      PRIORITY="$2"
+      shift 2
+      ;;
+    --tags|-t)
+      TAGS="$2"
+      shift 2
+      ;;
+    --click|-c)
+      CLICK_URL="$2"
+      shift 2
+      ;;
+    --scope|-s)
+      SCOPE_NAME="$2"
+      shift 2
+      ;;
+    --help|-h)
+      echo "Usage: notify [OPTIONS] [TITLE] <MESSAGE>"
+      echo "       echo \"build passed\" | notify \"Verification Gate\""
+      echo ""
+      echo "Options:"
+      echo "  -p, --priority <val>   Priority (min, low, default, high, urgent / 1-5)"
+      echo "  -t, --tags <tags>      Comma-separated emoji shortcodes or tags"
+      echo "  -c, --click <url>      URL opened on notification click"
+      echo "  -s, --scope <scope>    Scope manifest to load notification target from"
+      exit 0
+      ;;
+    *)
+      if [ -z "$MESSAGE" ] && [ -n "$TITLE" ] && [ $# -eq 1 ]; then
+        MESSAGE="$1"
+      elif [ -z "$MESSAGE" ] && [ $# -ge 2 ]; then
+        TITLE="$1"
+        MESSAGE="$2"
+        shift
+      else
+        MESSAGE="$MESSAGE $1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+# Read standard input if message is empty and pipe is present
+if [ -z "$MESSAGE" ] && [ ! -t 0 ]; then
+  MESSAGE="$(cat)"
+fi
+
+# Fallback if only one positional string was provided
+if [ -z "$MESSAGE" ] && [ -n "$TITLE" ]; then
+  MESSAGE="$TITLE"
+  TITLE="Looping Llama"
+fi
+
+if [ -z "$MESSAGE" ]; then
+  exit 0
+fi
+
+# Resolve Scope Configuration
+if [ -z "$SCOPE_NAME" ]; then
+  REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+  if [ -f "$REPO_ROOT/.loop-context" ] && grep -q "scope" "$REPO_ROOT/.loop-context"; then
+    SCOPE_NAME="$(grep "scope" "$REPO_ROOT/.loop-context" | cut -d'=' -f2 | tr -d ' "')"
+  elif [[ "$REPO_ROOT" == *"/work/"* ]]; then
+    SCOPE_NAME="work"
+  else
+    SCOPE_NAME="personal"
+  fi
+fi
+
+SCOPE_FILE="$CONFIG_HOME/scopes/${SCOPE_NAME}.toml"
+
+NTFY_URL="${NTFY_URL:-}"
+NTFY_TOPIC="${NTFY_TOPIC:-}"
+NTFY_TOKEN="${NTFY_TOKEN:-}"
+
+if [ -f "$SCOPE_FILE" ] && command -v yq >/dev/null 2>&1; then
+  [ -z "$NTFY_URL" ] && NTFY_URL="$(yq e '.notifications.ntfy_url // ""' "$SCOPE_FILE")"
+  [ -z "$NTFY_TOPIC" ] && NTFY_TOPIC="$(yq e '.notifications.ntfy_topic // ""' "$SCOPE_FILE")"
+  
+  TOKEN_ENV_VAR="$(yq e '.notifications.ntfy_token_env // ""' "$SCOPE_FILE")"
+  if [ -n "$TOKEN_ENV_VAR" ] && [ -n "${!TOKEN_ENV_VAR}" ]; then
+    NTFY_TOKEN="${!TOKEN_ENV_VAR}"
+  fi
+fi
+
+# Sensible defaults for standalone local operations
+NTFY_URL="${NTFY_URL:-http://localhost:8080}"
+NTFY_TOPIC="${NTFY_TOPIC:-llama-alerts}"
+
+# Secret Sanitization
+SECRET_PATTERN="(sk-[a-zA-Z0-9_-]{16,}|tk_[a-zA-Z0-9_-]{16,}|ghp_[a-zA-Z0-9_-]{16,}|bearer [a-zA-Z0-9._-]+)"
+if [ -f "$CONFIG_FILE" ] && command -v yq >/dev/null 2>&1; then
+  CUSTOM_PATTERN="$(yq e '.logging.secret_scrub_pattern // ""' "$CONFIG_FILE")"
+  [ -n "$CUSTOM_PATTERN" ] && SECRET_PATTERN="$CUSTOM_PATTERN"
+fi
+
+CLEAN_TITLE="$(echo "$TITLE" | sed -E "s/${SECRET_PATTERN}/[REDACTED]/g")"
+CLEAN_MESSAGE="$(echo "$MESSAGE" | sed -E "s/${SECRET_PATTERN}/[REDACTED]/g")"
+
+# Build curl headers
+CURL_ARGS=(
+  -s
+  -H "Title: ${CLEAN_TITLE}"
+  -H "Priority: ${PRIORITY}"
+  -H "Tags: ${TAGS}"
+)
+
+[ -n "$CLICK_URL" ] && CURL_ARGS+=(-H "Click: ${CLICK_URL}")
+[ -n "$NTFY_TOKEN" ] && CURL_ARGS+=(-H "Authorization: Bearer ${NTFY_TOKEN}")
+
+# Transmit to ntfy server (silent non-blocking failover)
+curl "${CURL_ARGS[@]}" \
+  -d "$CLEAN_MESSAGE" \
+  "${NTFY_URL%/}/${NTFY_TOPIC}" >/dev/null 2>&1 || true
