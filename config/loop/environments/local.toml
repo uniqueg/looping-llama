@@ -1,0 +1,21 @@
+# Looping Llama - Local Host Environment
+[environment]
+name = "local"
+type = "host"
+description = "Local workstation execution using isolated worktrees and optional sandboxing"
+
+[compute]
+executor = "local"
+max_parallel_jobs = 4
+
+[storage]
+backend = "filesystem"
+workspace_root = "."
+
+[sandboxing]
+bubblewrap = false
+isolate_network = false
+
+[verifier_bridge]
+# Direct invocation of repo contracts on host
+runner = "just"

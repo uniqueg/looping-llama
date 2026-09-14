@@ -1,0 +1,19 @@
+# Looping Llama - Generic Cloud / Kubernetes Environment
+[environment]
+name = "cloud-k8s"
+type = "kubernetes"
+description = "Containerized verification and execution in a Kubernetes namespace"
+
+[compute]
+executor = "k8s-job"
+namespace = "looping-llama-runners"
+kubeconfig_path = "~/.kube/config"
+job_timeout_seconds = 1800
+
+[storage]
+backend = "pvc"
+claim_name = "runner-scratch-pvc"
+mount_path = "/workspace"
+
+[verifier_bridge]
+runner = "kubectl create job --from=cronjob/llama-verifier-template verify-run-job && kubectl wait --for=condition=complete --timeout=600s job/verify-run-job"

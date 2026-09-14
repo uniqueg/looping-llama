@@ -1,0 +1,22 @@
+# Looping Llama - Generic HPC Slurm Cluster Environment
+[environment]
+name = "hpc-slurm"
+type = "slurm"
+description = "High-Performance Computing cluster managed via Slurm workload manager"
+
+[compute]
+executor = "ssh-slurm"
+ssh_host = "hpc-cluster.example.org"
+ssh_user_env = "HPC_USER"
+partition = "standard"
+default_qos = "normal"
+default_mem_gb = 16
+default_cpus = 4
+
+[storage]
+backend = "rclone"
+rclone_remote = "hpc-scratch:"
+mount_root = "/scratch/users/workdir"
+
+[verifier_bridge]
+runner = "ssh -O check hpc-cluster 2>/dev/null || ssh -MNf hpc-cluster; ssh hpc-cluster 'cd ~/scratch/staging && just verify'"
