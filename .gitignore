@@ -1,0 +1,48 @@
+# Operating system & editor noise
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# Local secrets & credential stores
+*.env
+*.env.*
+!.env.example
+*.key
+*.pem
+*.pub
+.secrets/
+credentials/
+
+# LiteLLM local spend database & proxy artifacts
+*.db
+*.db-journal
+*.sqlite3
+
+# Git Notes working files & scratchpads
+.tmp/
+scratch/
+TASK_STATE.md
+
+# Ephemeral loop sandboxes and worktrees
+.worktrees/
+
+# Ingestion caches & uncompressed heavy raw data
+.context/sources/raw/
+*.parquet
+*.bam
+*.sam
+*.vcf.gz
+*.tar.gz
+*.zip
+*.iso
+
+# Build outputs & caches
+dist/
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
