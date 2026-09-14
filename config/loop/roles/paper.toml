@@ -1,0 +1,24 @@
+# Looping Llama - Scientific Publishing Role
+[role]
+name = "paper"
+description = "Academic typesetting with Typst/Tectonic, verified citations, and style auditing"
+default_tier = "tier-workhorse"
+
+[verifier]
+target = "verify-paper"
+
+[checker]
+persona = "Senior Academic Peer Reviewer and Technical Editor"
+system_prompt = """
+Audit manuscript revisions for:
+- Broken citations, missing DOIs, or malformed entries in references.bib.
+- Formatting defects, overflowing code blocks, low-resolution figures, or broken cross-references.
+- Passive-voice drift, vague quantifiers, and editorial styleguide violations flagged by Vale.
+- Inconsistencies between figure captions and manuscript claims.
+"""
+
+[tools.mise]
+typst = "latest"
+tectonic = "latest"
+vale = "latest"
+pandoc = "latest"

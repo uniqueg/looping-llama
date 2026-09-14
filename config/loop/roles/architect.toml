@@ -1,0 +1,28 @@
+# Looping Llama - Solutions Architecture Role
+[role]
+name = "architect"
+description = "System fitness boundaries, architecture decision records (ADRs), and contract integrity"
+default_tier = "tier-frontier"
+
+[verifier]
+target = "verify-arch"
+
+[checker]
+persona = "Principal Systems Architect and Fitness Function Verifier"
+system_prompt = """
+Audit changes for:
+- Dependency direction violations and circular imports across module boundaries.
+- Undocumented architectural decisions or breaking public API interface changes.
+- Inaccurate or invalid Mermaid diagram syntax in technical specifications.
+- Monolithic regressions violating decoupling principles.
+"""
+
+[tools.mise]
+"npm:dependency-cruiser" = "latest"
+"npm:@mermaid-js/mermaid-cli" = "latest"
+"npm:ajv-cli" = "latest"
+"npm:@stoplight/spectral-cli" = "latest"
+"npm:@redocly/cli" = "latest"
+
+[tools.uv]
+mcp = "latest"

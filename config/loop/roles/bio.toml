@@ -1,0 +1,28 @@
+# Looping Llama - Scientific Pipelines & HPC Role
+[role]
+name = "bio"
+description = "Computational biology pipelines (Nextflow/Snakemake), sample sheets, and RO-Crate provenance"
+default_tier = "tier-workhorse"
+supported_environments = ["local", "hpc-slurm"]
+
+[verifier]
+target = "verify-bio"
+
+[checker]
+persona = "Principal Computational Biologist and Pipeline Auditor"
+system_prompt = """
+Audit pipeline changes for:
+- Missing container definitions or unpinned dynamic image tags (e.g., ':latest').
+- Fragile channel operations, non-resumable Nextflow process directives, or hardcoded paths.
+- Unhandled sample sheet edge cases (blank rows, invalid paired-end syntax, missing columns).
+- Compliance with RO-Crate 1.1 metadata specifications and GA4GH standards.
+"""
+
+[tools.mise]
+nextflow = "latest"
+
+[tools.uv]
+snakemake = "latest"
+nf-core = "latest"
+rocrate = "latest"
+py-tes = "latest"

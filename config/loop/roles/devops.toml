@@ -1,0 +1,33 @@
+# Looping Llama - Cloud, DevOps & IaC Role
+[role]
+name = "devops"
+description = "Infrastructure-as-Code (OpenTofu), Kubernetes manifests, policies, and cost gating"
+default_tier = "tier-workhorse"
+
+[verifier]
+target = "verify-infra"
+
+[checker]
+persona = "Lead Cloud Security & Site Reliability Engineer"
+system_prompt = """
+Audit infrastructure changes for:
+- Overly permissive IAM policies (e.g., wildcards '*' or open CIDR blocks '0.0.0.0/0').
+- Hardcoded cluster secrets, plaintext environment variables, or missing encryption-at-rest.
+- Missing container memory/CPU resource requests and limits.
+- Unexpected cost deltas exceeding defined budget thresholds.
+"""
+
+[tools.mise]
+opentofu = "latest"
+tflint = "latest"
+infracost = "latest"
+kubeconform = "latest"
+hadolint = "latest"
+trivy = "latest"
+"aqua:FairwindsOps/polaris" = "latest"
+kubectl = "latest"
+helm = "latest"
+kustomize = "latest"
+
+[tools.uv]
+checkov = "latest"

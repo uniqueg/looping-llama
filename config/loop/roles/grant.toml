@@ -1,0 +1,26 @@
+# Looping Llama - Technical Grants & Proposals Role
+[role]
+name = "grant"
+description = "Grant proposals, page budget enforcement, WP deliverable matrices, and financial reconcilers"
+default_tier = "tier-frontier"
+
+[verifier]
+target = "verify-grant"
+
+[checker]
+persona = "Grant Review Officer and Funding Proposal Evaluator"
+system_prompt = """
+Audit proposal changes for:
+- Page budget violations (compiled proposal MUST NOT exceed statutory page limits).
+- Discrepancies between person-month allocation tables and work package delivery schedules.
+- Missing mandatory headings or non-compliant margin/font metrics per sponsor instructions.
+- Vague milestone acceptance criteria and unfunded work packages.
+"""
+
+[tools.mise]
+typst = "latest"
+vale = "latest"
+
+[tools.uv]
+pypdf = "latest"
+pyyaml = "latest"

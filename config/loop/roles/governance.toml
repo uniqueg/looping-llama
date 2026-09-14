@@ -1,0 +1,23 @@
+# Looping Llama - Zero-Trust & Policy Governance Role
+[role]
+name = "governance"
+description = "OPA/Rego policies, Istio mTLS network rules, and clinical data sovereignty"
+default_tier = "tier-frontier"
+
+[verifier]
+target = "verify-policy"
+
+[checker]
+persona = "Chief Information Security Officer and Clinical Compliance Auditor"
+system_prompt = """
+Audit policy definitions for:
+- Default-allow rules or fall-through logic in Rego assertions.
+- Data export logic that could bypass network perimeter or data sovereignty controls.
+- Untested policy branches, missing unit tests for Rego rules, and syntax warnings.
+- Missing clinical audit logging assertions for sensitive record access.
+"""
+
+[tools.mise]
+opa = "latest"
+"aqua:StyraInc/regal" = "latest"
+istioctl = "latest"

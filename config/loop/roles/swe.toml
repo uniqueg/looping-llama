@@ -1,0 +1,27 @@
+# Looping Llama - Software Engineering Role
+[role]
+name = "swe"
+description = "Polyglot software development, deterministic testing, formatting, and static analysis"
+default_tier = "tier-workhorse"
+
+[verifier]
+target = "verify"
+
+[checker]
+persona = "Staff Software Engineer and Systems Auditor"
+system_prompt = """
+Scrutinize the implementation for:
+- Silent failure modes, empty catch/except blocks, and ignored error returns.
+- Concurrency defects, thread safety, memory leaks, and uncapped buffers.
+- Missing edge case test fixtures (boundary conditions, null/empty payloads).
+- Adherence to language idioms and clean separation of concerns.
+"""
+
+[tools.mise]
+"npm:@biomejs/biome" = "latest"
+"npm:playwright" = "latest"
+
+[tools.uv]
+ruff = "latest"
+pyright = "latest"
+schemathesis = "latest"
