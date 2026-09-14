@@ -1,0 +1,347 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/loop"
+CONFIG_FILE="$CONFIG_HOME/config.toml"
+TASK=""
+EXPLICIT_PROJECT=""
+EXPLICIT_ROLE=""
+EXPLICIT_SCOPE=""
+EXPLICIT_ENV=""
+DEBUG_MODE=false
+
+# ANSI colors
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+BLUE="\033[0;34m"
+YELLOW="\033[0;33m"
+RED="\033[0;31m"
+MAGENTA="\033[0;35m"
+RESET="\033[0m"
+
+log_info()    { echo -e "${BLUE}[INFO]${RESET} $1"; }
+log_step()    { echo -e "${MAGENTA}[LOOP]${RESET} $1"; }
+log_ok()      { echo -e "${GREEN}[PASS]${RESET} $1"; }
+log_warn()    { echo -e "${YELLOW}[WARN]${RESET} $1"; }
+log_err()     { echo -e "${RED}[FAIL]${RESET} $1"; exit 1; }
+log_breaker() { echo -e "${RED}${BOLD}[CIRCUIT BREAKER]${RESET} $1"; }
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --project|-p) EXPLICIT_PROJECT="$2"; shift 2 ;;
+    --role)       EXPLICIT_ROLE="$2"; shift 2 ;;
+    --scope)      EXPLICIT_SCOPE="$2"; shift 2 ;;
+    --env)        EXPLICIT_ENV="$2"; shift 2 ;;
+    --debug)      DEBUG_MODE=true; shift ;;
+    --help|-h)
+      echo "Usage: llama [OPTIONS] \"<task description>\""
+      echo "       llama -p my-app \"Implement REST health endpoint\""
+      echo "       llama \"@bio Normalize VCF records and verify\""
+      exit 0
+      ;;
+    *)
+      if [ -z "$TASK" ]; then
+        TASK="$1"
+      else
+        TASK="$TASK $1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+[ -z "$TASK" ] && log_err "No task specified."
+
+# Extract Inline @tag Annotations
+if [[ "$TASK" =~ @([a-zA-Z0-9_-]+) ]]; then
+  TAG="${BASH_REMATCH[1]}"
+  if [ -f "$CONFIG_HOME/roles/${TAG}.toml" ]; then
+    EXPLICIT_ROLE="$TAG"
+  elif [ -f "$CONFIG_HOME/scopes/${TAG}.toml" ]; then
+    EXPLICIT_SCOPE="$TAG"
+  elif [ -f "$CONFIG_HOME/environments/${TAG}.toml" ]; then
+    EXPLICIT_ENV="$TAG"
+  fi
+fi
+
+# Resolve Workspace Target & Project Directory
+if [ -n "$EXPLICIT_SCOPE" ]; then
+  RESOLVED_SCOPE="$EXPLICIT_SCOPE"
+elif [[ "$(pwd)" == *"/work"* ]]; then
+  RESOLVED_SCOPE="work"
+else
+  RESOLVED_SCOPE="personal"
+fi
+
+SCOPE_FILE="$CONFIG_HOME/scopes/${RESOLVED_SCOPE}.toml"
+WORKSPACE_ROOT=""
+if [ -f "$SCOPE_FILE" ] && command -v yq >/dev/null 2>&1; then
+  WORKSPACE_ROOT="$(yq e '.workspace.root // ""' "$SCOPE_FILE")"
+fi
+[ -z "$WORKSPACE_ROOT" ] && WORKSPACE_ROOT="$(yq e '.workspace.default_root // "~/Projects"' "$CONFIG_FILE" 2>/dev/null)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT/#\~/$HOME}"
+
+INSIDE_GIT=false
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  INSIDE_GIT=true
+fi
+
+if [ -n "$EXPLICIT_PROJECT" ]; then
+  TARGET_REPO="${WORKSPACE_ROOT}/${EXPLICIT_PROJECT}"
+  if [ ! -d "$TARGET_REPO" ]; then
+    log_info "Project '${EXPLICIT_PROJECT}' not found. Auto-scaffolding in ${TARGET_REPO}..."
+    mkdir -p "$WORKSPACE_ROOT"
+    (cd "$WORKSPACE_ROOT" && llama-scaffold "$EXPLICIT_PROJECT" "${EXPLICIT_ROLE:-swe}")
+  fi
+  REPO_ROOT="$TARGET_REPO"
+elif [ "$INSIDE_GIT" = false ]; then
+  PROJECT_SLUG="$(echo "$TASK" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g' | cut -d'-' -f1-4)"
+  [ -z "$PROJECT_SLUG" ] && PROJECT_SLUG="llama-project-$(date +%s)"
+  
+  TARGET_REPO="${WORKSPACE_ROOT}/${PROJECT_SLUG}"
+  echo -e "${YELLOW}[PROJECT]${RESET} Outside repository. Auto-scaffolding project: ${BOLD}${PROJECT_SLUG}${RESET}"
+  echo -e "          Target path: ${BLUE}${TARGET_REPO}${RESET}"
+  
+  mkdir -p "$WORKSPACE_ROOT"
+  (cd "$WORKSPACE_ROOT" && llama-scaffold "$PROJECT_SLUG" "${EXPLICIT_ROLE:-swe}")
+  REPO_ROOT="$TARGET_REPO"
+else
+  REPO_ROOT="$(git rev-parse --show-toplevel)"
+fi
+
+cd "$REPO_ROOT"
+
+# Resolve Context
+if [ -z "$EXPLICIT_SCOPE" ] && [ -f ".loop-context" ] && grep -q "scope" ".loop-context"; then
+  RESOLVED_SCOPE="$(grep "scope" ".loop-context" | cut -d'=' -f2 | tr -d ' "')"
+fi
+
+if [ -n "$EXPLICIT_ROLE" ]; then
+  RESOLVED_ROLE="$EXPLICIT_ROLE"
+elif [ -f ".loop-context" ] && grep -q "role" ".loop-context"; then
+  RESOLVED_ROLE="$(grep "role" ".loop-context" | cut -d'=' -f2 | tr -d ' "')"
+else
+  RESOLVED_ROLE="swe"
+fi
+
+RESOLVED_ENV="${EXPLICIT_ENV:-local}"
+
+ROLE_FILE="$CONFIG_HOME/roles/${RESOLVED_ROLE}.toml"
+SCOPE_FILE="$CONFIG_HOME/scopes/${RESOLVED_SCOPE}.toml"
+ENV_FILE="$CONFIG_HOME/environments/${RESOLVED_ENV}.toml"
+
+[ -f "$ROLE_FILE" ]  || log_err "Role file '$ROLE_FILE' not found."
+[ -f "$SCOPE_FILE" ] || log_err "Scope file '$SCOPE_FILE' not found."
+[ -f "$ENV_FILE" ]   || log_err "Environment file '$ENV_FILE' not found."
+
+VERIFY_TARGET="$(yq e '.verifier.local_target // .verifier.target // "verify"' "$ROLE_FILE")"
+CHECKER_PERSONA="$(yq e '.checker.persona // "Adversarial Code Reviewer"' "$ROLE_FILE")"
+CHECKER_PROMPT="$(yq e '.checker.system_prompt // ""' "$ROLE_FILE")"
+INITIAL_TIER="$(yq e '.role.default_tier // "tier-workhorse"' "$ROLE_FILE")"
+
+MAX_ITERATIONS=$(yq e '.engine.max_iterations // 6' "$CONFIG_FILE" 2>/dev/null || echo 6)
+GATEWAY_URL=$(yq e '.gateway.url // "http://localhost:4000"' "$CONFIG_FILE" 2>/dev/null || echo "http://localhost:4000")
+SECRET_SCRUB_REGEX=$(yq e '.logging.secret_scrub_pattern // "(sk-[a-zA-Z0-9_-]{16,}|tk_[a-zA-Z0-9_-]{16,})"' "$CONFIG_FILE" 2>/dev/null || echo "(sk-[a-zA-Z0-9_-]{16,})")
+
+# Health Check
+if ! curl -sf "${GATEWAY_URL}/health/liveliness" >/dev/null 2>&1; then
+  log_err "LiteLLM gateway unreachable at ${GATEWAY_URL}. Is litellm running?"
+fi
+
+# Isolated Git Worktree
+RUN_ID="$(date +%s)_$RANDOM"
+WORKTREE_BRANCH="loop/run-${RUN_ID}"
+WORKTREE_PATH="${REPO_ROOT}/.worktrees/loop-${RUN_ID}"
+ORIGINAL_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+log_info "Preparing isolated worktree: ${WORKTREE_BRANCH}"
+mkdir -p "${REPO_ROOT}/.worktrees"
+git worktree add -b "$WORKTREE_BRANCH" "$WORKTREE_PATH" "$ORIGINAL_BRANCH" >/dev/null 2>&1
+
+cleanup() {
+  local exit_code=$?
+  if [ -d "$WORKTREE_PATH" ]; then
+    log_info "Tearing down ephemeral worktree..."
+    cd "$REPO_ROOT"
+    git worktree remove --force "$WORKTREE_PATH" >/dev/null 2>&1 || true
+    git branch -D "$WORKTREE_BRANCH" >/dev/null 2>&1 || true
+  fi
+  exit $exit_code
+}
+trap cleanup EXIT INT TERM
+
+cd "$WORKTREE_PATH"
+
+echo -e "\n${BOLD}🦙 Looping Llama Starting Turn${RESET}"
+echo "=================================================="
+echo -e "Project:     ${BOLD}$(basename "$REPO_ROOT")${RESET}"
+echo -e "Task:        ${BOLD}${TASK}${RESET}"
+echo -e "Scope:       ${GREEN}${RESOLVED_SCOPE}${RESET}"
+echo -e "Role:        ${MAGENTA}@${RESOLVED_ROLE}${RESET}"
+echo -e "Environment: ${BLUE}${RESOLVED_ENV}${RESET}"
+echo -e "Verifier:    ${BOLD}just ${VERIFY_TARGET}${RESET}"
+echo "=================================================="
+
+TIERS=("tier-micro" "tier-workhorse" "tier-frontier" "tier-reasoning")
+CURRENT_TIER_IDX=1
+for i in "${!TIERS[@]}"; do
+  if [[ "${TIERS[$i]}" == "$INITIAL_TIER" ]]; then
+    CURRENT_TIER_IDX=$i
+    break
+  fi
+done
+
+ITERATION=1
+DIFF_HASHES=()
+ERROR_LOG=""
+
+compact_errors() {
+  local raw="$1"
+  local lines
+  lines=$(echo "$raw" | wc -l)
+  if [ "$lines" -le 80 ]; then
+    echo "$raw"
+  else
+    echo "$raw" | head -n 30
+    echo -e "\n[... truncated $((lines - 80)) lines of output ...]\n"
+    echo "$raw" | tail -n 50
+  fi
+}
+
+scrub_secrets() {
+  sed -E "s/${SECRET_SCRUB_REGEX}/[REDACTED_SECRET]/g"
+}
+
+while [ "$ITERATION" -le "$MAX_ITERATIONS" ]; do
+  CURRENT_TIER="${TIERS[$CURRENT_TIER_IDX]}"
+  log_step "Iteration ${ITERATION}/${MAX_ITERATIONS} [Model Tier: ${CURRENT_TIER}]"
+
+  # Construct Context-Buffered Maker Prompt
+  MAKER_PROMPT="Task: ${TASK}\nRole: ${RESOLVED_ROLE}\n"
+  if [ -f "${REPO_ROOT}/.context/rules/CONSTRAINTS.md" ]; then
+    MAKER_PROMPT="${MAKER_PROMPT}\nConstraints:\n$(cat "${REPO_ROOT}/.context/rules/CONSTRAINTS.md")\n"
+  fi
+  if [ -f "${REPO_ROOT}/.context/rules/${RESOLVED_ROLE}.md" ]; then
+    MAKER_PROMPT="${MAKER_PROMPT}\nRole Rules:\n$(cat "${REPO_ROOT}/.context/rules/${RESOLVED_ROLE}.md")\n"
+  fi
+  if [ -n "$ERROR_LOG" ]; then
+    MAKER_PROMPT="${MAKER_PROMPT}\nPrevious Failures to fix:\n${ERROR_LOG}\n"
+  fi
+
+  # Run OpenCode Maker
+  log_info "Maker (${CURRENT_TIER}) generating updates..."
+  MAKER_LOG="$(mktemp)"
+  set +e
+  OPENAI_BASE_URL="http://127.0.0.1:4000/v1" OPENAI_API_KEY="sk-looping-llama-local-master" opencode run --model "litellm/${CURRENT_TIER}" "$(echo -e "$MAKER_PROMPT")" > "$MAKER_LOG" 2>&1
+  MAKER_EXIT=$?
+  set -e
+
+  # Gate 1: Check if Maker actually created or edited any files
+  DIRTY_FILES="$(git status --porcelain)"
+  if [ -z "$DIRTY_FILES" ]; then
+    log_warn "Maker completed without modifying or creating any files (exit code: $MAKER_EXIT)."
+    CLEAN_MAKER="$(cat "$MAKER_LOG" | scrub_secrets)"
+    ERROR_LOG="Maker produced no file changes.\nOutput:\n$(compact_errors "$CLEAN_MAKER")"
+    rm -f "$MAKER_LOG"
+    
+    if [ "$CURRENT_TIER_IDX" -lt $((${#TIERS[@]} - 1)) ]; then
+      CURRENT_TIER_IDX=$((CURRENT_TIER_IDX + 1))
+      log_warn "Escalating model tier to ${TIERS[$CURRENT_TIER_IDX]}..."
+    fi
+    ITERATION=$((ITERATION + 1))
+    continue
+  fi
+  rm -f "$MAKER_LOG"
+
+  # Gate 2: Circuit Breaker Diff Hashing
+  CURRENT_DIFF_HASH=$(git diff | sha256sum | awk '{print $1}')
+  for past_hash in "${DIFF_HASHES[@]}"; do
+    if [ "$past_hash" = "$CURRENT_DIFF_HASH" ] && [ -n "$CURRENT_DIFF_HASH" ]; then
+      log_breaker "Oscillation detected! Identical diff state observed."
+      if [ "$CURRENT_TIER_IDX" -lt $((${#TIERS[@]} - 1)) ]; then
+        CURRENT_TIER_IDX=$((CURRENT_TIER_IDX + 1))
+        log_warn "Escalating model tier to ${TIERS[$CURRENT_TIER_IDX]} to break cyclic edits."
+      fi
+    fi
+  done
+  DIFF_HASHES+=("$CURRENT_DIFF_HASH")
+
+  # Gate 3: Deterministic Verifier Contract
+  log_info "Executing deterministic gate: just ${VERIFY_TARGET}..."
+  set +e
+  RAW_VERIFY_OUT="$(just "$VERIFY_TARGET" 2>&1)"
+  VERIFY_EXIT=$?
+  set -e
+
+  if [ $VERIFY_EXIT -ne 0 ]; then
+    log_warn "Deterministic verification failed (exit code: $VERIFY_EXIT)."
+    CLEAN_LOG="$(echo "$RAW_VERIFY_OUT" | scrub_secrets)"
+    ERROR_LOG="$(compact_errors "$CLEAN_LOG")"
+
+    if [ "$DEBUG_MODE" = true ]; then
+      echo -e "${YELLOW}--- Debug Output ---${RESET}\n$ERROR_LOG\n--------------------"
+      read -p "(c)ontinue, (e)dit, or (a)bort? " -r choice
+      case "$choice" in
+        a*|A*) log_err "Run aborted by user."; exit 1 ;;
+        e*|E*) "${EDITOR:-hx}" . ;;
+      esac
+    fi
+
+    # Escalate tier after repeated failures
+    if [ $((ITERATION % 2)) -eq 0 ] && [ "$CURRENT_TIER_IDX" -lt $((${#TIERS[@]} - 1)) ]; then
+      CURRENT_TIER_IDX=$((CURRENT_TIER_IDX + 1))
+      log_warn "Escalating to higher capability tier: ${TIERS[$CURRENT_TIER_IDX]}"
+    fi
+
+    ITERATION=$((ITERATION + 1))
+    continue
+  fi
+
+  log_ok "Deterministic verification passed!"
+
+  # Gate 4: Adversarial Checker Review
+  log_info "Invoking Adversarial Checker (${CHECKER_PERSONA})..."
+  DIFF_CONTENT="$(git diff HEAD)"
+  REVIEW_OUT="$(review --persona "$CHECKER_PERSONA" --prompt "$CHECKER_PROMPT" "$DIFF_CONTENT")"
+
+  if echo "$REVIEW_OUT" | grep -q "\[BLOCK\]"; then
+    log_warn "Adversarial Checker rejected the diff with blockers."
+    ERROR_LOG="Adversarial Review Blockers:\n$REVIEW_OUT"
+    ITERATION=$((ITERATION + 1))
+    continue
+  fi
+
+  log_ok "Adversarial Checker approved diff."
+  break
+done
+
+if [ "$ITERATION" -gt "$MAX_ITERATIONS" ]; then
+  notify "Looping Llama" "Task failed after ${MAX_ITERATIONS} iterations: ${TASK}"
+  log_err "Maximum iterations exceeded. Rolling back."
+  exit 1
+fi
+
+# Commit and Merge
+log_info "Finalizing commit and merging changes..."
+git add -A
+# Dynamically resolve identity from scope or fall back to git config
+SCOPE_GIT_NAME="$(yq e '.identity.git_name // ""' "$SCOPE_FILE" 2>/dev/null || true)"
+SCOPE_GIT_EMAIL="$(yq e '.identity.git_email // ""' "$SCOPE_FILE" 2>/dev/null || true)"
+AUTHOR_NAME="${SCOPE_GIT_NAME:-$(git config user.name 2>/dev/null || echo "Looping Llama Agent")}"
+AUTHOR_EMAIL="${SCOPE_GIT_EMAIL:-$(git config user.email 2>/dev/null || echo "llama@local.internal")}"
+
+GIT_AUTHOR_NAME="$AUTHOR_NAME" GIT_AUTHOR_EMAIL="$AUTHOR_EMAIL" \
+GIT_COMMITTER_NAME="$AUTHOR_NAME" GIT_COMMITTER_EMAIL="$AUTHOR_EMAIL" \
+git commit -m "feat(${RESOLVED_ROLE}): ${TASK}" >/dev/null
+
+COMMIT_HASH="$(git rev-parse HEAD)"
+cd "$REPO_ROOT"
+git merge --ff-only "$WORKTREE_BRANCH" >/dev/null 2>&1 || git merge "$WORKTREE_BRANCH" >/dev/null
+
+# Provenance & Notifications
+log_info "Recording provenance trace..."
+record-provenance --commit "$COMMIT_HASH" --task "$TASK" --role "$RESOLVED_ROLE" --scope "$RESOLVED_SCOPE" || true
+COSIGN_PASSWORD="${COSIGN_PASSWORD:-}" sign-provenance --commit "$COMMIT_HASH" --scope "$RESOLVED_SCOPE" || true
+
+notify "Looping Llama Task Complete" "Verified commit ${COMMIT_HASH:0:8} for task: '${TASK}'"
+log_ok "Task completed successfully."
