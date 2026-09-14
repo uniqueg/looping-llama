@@ -1,0 +1,70 @@
+# Looping Llama - Engine Configuration Manifest
+# Global runtime constraints, circuit breakers, and gateway defaults.
+
+[engine]
+# Maximum Maker-Verifier iterations before halting with a fatal exit
+max_iterations = 6
+
+# Timeout per single execution turn in seconds (Maker turn or Verifier command)
+execution_timeout_seconds = 300
+
+# Default fallbacks when not specified via flag, prompt tag, or directory context
+default_scope = "personal"
+default_environment = "local"
+default_role = "swe"
+
+[gateway]
+# LiteLLM Proxy endpoint
+url = "http://localhost:4000"
+health_endpoint = "http://localhost:4000/health"
+health_timeout_ms = 300
+
+[circuit_breaker]
+# Prevent infinite oscillation between conflicting edits
+# Enables SHA-256 diff hashing across consecutive turns
+enabled = true
+
+# Number of past diff hashes to inspect for cyclic patterns
+history_depth = 4
+
+# Action when an oscillation cycle is detected: "escalate_tier", "pause", or "abort"
+on_oscillation = "escalate_tier"
+
+[sandboxing]
+# Optional Bubblewrap (bwrap) unprivileged filesystem containment
+# If true, runs OpenCode inside an ephemeral namespace
+bwrap_enabled = false
+
+# Read-only paths exposed inside the sandbox namespace
+readonly_paths = [
+  "/usr",
+  "/bin",
+  "/lib",
+  "/lib64",
+  "/etc/resolv.conf",
+  "/etc/ssl",
+  "/etc/pki"
+]
+
+# Paths masked completely from agent view inside sandbox
+masked_paths = [
+  "~/.ssh",
+  "~/.config/cosign",
+  "~/.gnupg"
+]
+
+[worktrees]
+# Ephemeral branch and worktree directory relative to repo root
+worktree_dir = ".worktrees"
+
+# Automatically prune and remove worktree after verification and merge
+cleanup_on_success = true
+cleanup_on_abort = true
+
+[logging]
+# Log compaction: keep N head lines and N tail lines of raw compiler/test output
+log_head_lines = 30
+log_tail_lines = 50
+
+# Regex pattern for egress credential sanitization
+secret_scrub_pattern = "(sk-[a-zA-Z0-9_-]{16,}|tk_[a-zA-Z0-9_-]{16,}|ghp_[a-zA-Z0-9_-]{16,}|cosign-private-key)"
