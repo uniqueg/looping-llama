@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+PROJECT_NAME="$1"
+ROLE="${2:-swe}"
+
+if [ -z "$PROJECT_NAME" ]; then
+  echo "Usage: llama-scaffold <project-name> [role]"
+  exit 1
+fi
+
+echo "Scaffolding new project: $PROJECT_NAME (role: @$ROLE)..."
+mkdir -p "$PROJECT_NAME"
+cd "$PROJECT_NAME"
+
+git init -b main >/dev/null
+
+# Initialize with loop-init
+loop-init .
+
+# Add base gitignore
+cat <<'EOF' > .gitignore
+.DS_Store
+*.swp
+*.env
+*.env.*
+!.env.example
+.worktrees/
+.tmp/
+dist/
+build/
+__pycache__/
+EOF
+
+# Setup standard GitHub Actions CI parity
+mkdir -p .github/workflows
+cat <<'EOF' > .github/workflows/pipeline.yml
+name: Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - name: Deterministic Verification Gate
+        run: just verify
+EOF
+
+git add -A
+git commit -m "chore: scaffold initial repository structure" >/dev/null
+
+echo "[OK] Project '$PROJECT_NAME' created and committed."

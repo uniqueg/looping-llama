@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+TARGET_DIR="${1:-$REPO_ROOT}"
+cd "$TARGET_DIR"
+
+# ANSI Colors
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+BLUE="\033[0;34m"
+YELLOW="\033[0;33m"
+RESET="\033[0m"
+
+echo -e "${BOLD}🦙 Initializing Looping Llama Context in:${RESET} $TARGET_DIR"
+
+# 1. Detect Domain & Dominant Runtimes
+DETECTED_ROLE="swe"
+DETECTED_RUNTIMES=()
+
+if [ -f "nextflow.config" ] || [ -f "main.nf" ] || [ -f "Snakefile" ]; then
+  DETECTED_ROLE="bio"
+  DETECTED_RUNTIMES+=("bioinformatics")
+fi
+
+if [ -f "main.tf" ] || [ -f "terragrunt.hcl" ] || [ -d "k8s" ] || [ -d "kubernetes" ]; then
+  DETECTED_ROLE="devops"
+  DETECTED_RUNTIMES+=("infrastructure")
+fi
+
+if [ -f "Cargo.toml" ]; then
+  DETECTED_RUNTIMES+=("rust")
+fi
+
+if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ] || [ -f "setup.py" ]; then
+  DETECTED_RUNTIMES+=("python")
+fi
+
+if [ -f "package.json" ]; then
+  DETECTED_RUNTIMES+=("node/typescript")
+fi
+
+if [ -f "paper.typ" ] || [ -f "main.tex" ]; then
+  DETECTED_ROLE="paper"
+  DETECTED_RUNTIMES+=("academic-typesetting")
+fi
+
+echo -e "Detected ecosystem: ${GREEN}${DETECTED_RUNTIMES[*]:-generic}${RESET} (Recommended role: ${BOLD}@${DETECTED_ROLE}${RESET})"
+
+# 2. Scaffolding .context directory
+mkdir -p .context/rules .context/sources
+
+# 3. Create .loop-context
+if [ ! -f ".loop-context" ]; then
+  cat <<EOF > .loop-context
+# Looping Llama Repository Context Override
+role = "${DETECTED_ROLE}"
+scope = "personal"
+environment = "local"
+EOF
+  echo -e "${BLUE}[OK]${RESET} Created .loop-context"
+else
+  echo -e "${YELLOW}[SKIP]${RESET} .loop-context already exists"
+fi
+
+# 4. Create Baseline .context/rules/CONSTRAINTS.md
+if [ ! -f ".context/rules/CONSTRAINTS.md" ]; then
+  cat <<EOF > .context/rules/CONSTRAINTS.md
+# Operational Constraints & Boundaries
+
+- All changes must pass deterministic verification via \`just verify\` (exit code 0).
+- Do not commit plaintext API keys, passwords, or personal credentials.
+- Retain existing architectural boundaries and directory hierarchies.
+- Write hermetic unit and integration tests for every new logic branch.
+EOF
+  echo -e "${BLUE}[OK]${RESET} Created .context/rules/CONSTRAINTS.md"
+fi
+
+# 5. Create Baseline AGENTS.md / CLAUDE.md
+if [ ! -f "AGENTS.md" ]; then
+  cat <<EOF > AGENTS.md
+# Agent Operational Guidelines
+
+This repository uses **Looping Llama** for autonomous Maker-Verifier loops.
+
+## Core Rules:
+1. **Verification Gate**: Before declaring a task complete, you must ensure \`just verify\` exits with code \`0\`.
+2. **Context Inspection**: Read \`.context/rules/\` before making architectural decisions.
+3. **No Interactive Prompts**: All commands, test fixtures, and scripts must run non-interactively.
+EOF
+  ln -sf AGENTS.md CLAUDE.md 2>/dev/null || true
+  echo -e "${BLUE}[OK]${RESET} Created AGENTS.md and symlinked CLAUDE.md"
+fi
+
+# 6. Generate Context-Aware justfile if Missing
+if [ ! -f "justfile" ]; then
+  echo -e "${BLUE}[INFO]${RESET} Generating tailored justfile contract..."
+  
+  cat <<'EOF' > justfile
+# Looping Llama - Deterministic Verification Contract
+set shell := ["bash", "-eo", "pipefail", "-c"]
+
+# Default contract invoked by the loop orchestrator
+default: verify
+
+# Unified entry point for Maker-Verifier gate (must return exit code 0)
+verify: lint test
+
+lint:
+    @echo "[LINT] Running static analysis..."
+
+test:
+    @echo "[TEST] Executing deterministic test suites..."
+EOF
+
+  # Append language-specific verification blocks
+  if [[ " ${DETECTED_RUNTIMES[*]} " =~ "rust" ]]; then
+    cat <<'EOF' >> justfile
+
+# Rust Recipes
+lint-rust:
+    cargo clippy --all-targets --all-features -- -D warnings
+    cargo fmt --all -- --check
+
+test-rust:
+    cargo test --all-targets --all-features
+EOF
+  fi
+
+  if [[ " ${DETECTED_RUNTIMES[*]} " =~ "python" ]]; then
+    cat <<'EOF' >> justfile
+
+# Python Recipes
+lint-py:
+    ruff check .
+    ruff format --check .
+    pyright .
+
+test-py:
+    pytest -q
+EOF
+  fi
+
+  if [[ " ${DETECTED_RUNTIMES[*]} " =~ "bioinformatics" ]]; then
+    cat <<'EOF' >> justfile
+
+# Bioinformatics Pipeline Recipes
+verify-bio: lint-nf test-nf
+
+lint-nf:
+    nextflow config -check .
+    nf-core lint .
+
+test-nf:
+    nextflow run main.nf -profile test,stub
+EOF
+  fi
+
+  echo -e "${BLUE}[OK]${RESET} Generated justfile with verification targets."
+else
+  echo -e "${YELLOW}[SKIP]${RESET} Existing justfile detected."
+fi
+
+echo -e "${GREEN}${BOLD}Repository successfully initialized for Looping Llama!${RESET}"

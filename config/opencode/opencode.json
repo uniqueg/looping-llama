@@ -1,17 +1,32 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "providers": {
+  "provider": {
     "litellm": {
-      "type": "openai",
-      "baseUrl": "http://127.0.0.1:4000/v1",
-      "apiKey": "sk-looping-llama-local-master",
-      "models": [
-        "tier-micro",
-        "tier-workhorse",
-        "tier-frontier",
-        "tier-reasoning"
-      ]
+      "id": "litellm",
+      "name": "LiteLLM Gateway",
+      "api": "openai",
+      "options": {
+        "baseURL": "http://127.0.0.1:4000/v1",
+        "apiKey": "sk-looping-llama-local-master"
+      },
+      "models": {
+        "tier-micro": {
+          "name": "Tier Micro",
+          "tool_call": true
+        },
+        "tier-workhorse": {
+          "name": "Tier Workhorse",
+          "tool_call": true
+        },
+        "tier-frontier": {
+          "name": "Tier Frontier",
+          "tool_call": true
+        },
+        "tier-reasoning": {
+          "name": "Tier Reasoning",
+          "tool_call": true
+        }
+      }
     }
-  },
-  "defaultProvider": "litellm"
+  }
 }
