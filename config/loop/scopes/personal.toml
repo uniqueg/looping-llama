@@ -1,0 +1,28 @@
+# Looping Llama - Personal Scope Configuration
+[scope]
+name = "personal"
+description = "Personal open-source projects, experiments, and exploratory research"
+
+[identity]
+git_name = ""
+git_email = ""
+cosign_key = "~/.config/cosign/personal.key"
+cosign_pub = "~/.config/cosign/personal.pub"
+
+[secrets]
+provider = "openbao"
+address = "http://127.0.0.1:8200"
+mount_path = "secret/data/personal"
+
+[notifications]
+ntfy_url = "https://ntfy.sh"
+ntfy_topic = "llama-personal-alerts"
+ntfy_token_env = "PERSONAL_NTFY_TOKEN"
+
+[model_policy]
+litellm_team_token = "sk-personal-team-default"
+compliance_tier = "unrestricted"
+allowed_providers = ["*"]
+forbidden_providers = []
+max_spend_per_task_usd = 0.75
+default_tier = "tier-workhorse"

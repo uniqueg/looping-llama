@@ -1,0 +1,35 @@
+# Looping Llama - Work Scope Configuration
+[scope]
+name = "work"
+description = "Professional, corporate, or team software engineering and research"
+
+[identity]
+git_name = ""
+git_email = ""
+cosign_key = "~/.config/cosign/work.key"
+cosign_pub = "~/.config/cosign/work.pub"
+
+[secrets]
+provider = "openbao"
+address = "https://vault.example.com"
+mount_path = "secret/data/work"
+
+[notifications]
+ntfy_url = "https://ntfy.example.com"
+ntfy_topic = "work-loop-alerts"
+ntfy_token_env = "WORK_NTFY_TOKEN"
+
+[model_policy]
+litellm_team_token = "sk-work-enterprise-pool"
+compliance_tier = "zero-retention"
+allowed_providers = [
+  "anthropic",
+  "azure-openai",
+  "bedrock",
+  "local-vllm"
+]
+forbidden_providers = [
+  "openrouter"
+]
+max_spend_per_task_usd = 3.00
+default_tier = "tier-frontier"
