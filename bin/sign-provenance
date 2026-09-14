@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# Looping Llama - Cryptographic Provenance Signer
+set -euo pipefail
+
+REF="refs/notes/provenance"
+SIG_REF="refs/notes/provenance.sig"
+SCOPE=""
+COMMIT_SHA=""
+CONFIG_ROOT="${XDG_CONFIG_HOME:-$HOME/.config}/loop"
+COSIGN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/cosign"
+SIGNING_CONFIG="$COSIGN_DIR/offline-signing-config.json"
+
+log_info()  { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+log_ok()    { echo -e "\033[1;32m[OK]\033[0m $*"; }
+log_error() { echo -e "\033[1;31m[ERROR]\033[0m $*" >&2; }
+
+usage() {
+    cat <<USAGE
+Usage: $(basename "$0") --commit <commit> --scope <scope> [options]
+
+Cryptographically sign git provenance notes using Cosign bundles.
+
+Options:
+    -c, --commit <sha>   Target commit SHA or reference (required)
+    -s, --scope <name>   Scope name providing the signing identity (required)
+        --ref <ref>      Source git notes ref (default: refs/notes/provenance)
+        --sig-ref <ref>  Target signatures git notes ref (default: refs/notes/provenance.sig)
+    -h, --help           Show this message
+USAGE
+    exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -c|--commit) COMMIT_SHA="$2"; shift 2 ;;
+        -s|--scope) SCOPE="$2"; shift 2 ;;
+        --ref) REF="$2"; shift 2 ;;
+        --sig-ref) SIG_REF="$2"; shift 2 ;;
+        -h|--help) usage ;;
+        *) log_error "Unknown argument: $1"; usage ;;
+    esac
+done
+
+if [[ -z "$COMMIT_SHA" || -z "$SCOPE" ]]; then
+    log_error "Both --commit and --scope are mandatory."
+    exit 1
+fi
+
+COMMIT_SHA="$(git rev-parse --verify "$COMMIT_SHA" 2>/dev/null)" || {
+    log_error "Invalid commit target: $COMMIT_SHA"
+    exit 1
+}
+
+SCOPE_MANIFEST="$CONFIG_ROOT/scopes/${SCOPE}.toml"
+if [[ ! -f "$SCOPE_MANIFEST" ]]; then
+    log_error "Scope manifest not found: $SCOPE_MANIFEST"
+    exit 1
+fi
+
+# Extract configured cosign key path
+KEY_PATH="$(grep -E '^[[:space:]]*cosign_key[[:space:]]*=' "$SCOPE_MANIFEST" | head -n1 | cut -d'=' -f2- | tr -d ' "')"
+KEY_PATH="${KEY_PATH/#\~/$HOME}"
+
+if [[ -z "$KEY_PATH" || ! -f "$KEY_PATH" ]]; then
+    log_error "Cosign private key not found at '$KEY_PATH' defined in scope '$SCOPE'."
+    exit 1
+fi
+
+PROVENANCE_PAYLOAD="$(git notes --ref="$REF" show "$COMMIT_SHA" 2>/dev/null)" || {
+    log_error "No provenance note found on commit ${COMMIT_SHA:0:8} under ref '$REF'."
+    exit 1
+}
+
+# Ensure offline signing configuration exists
+if [[ ! -f "$SIGNING_CONFIG" ]]; then
+    mkdir -p "$COSIGN_DIR"
+    cosign signing-config create \
+        --with-default-services \
+        --no-default-rekor \
+        --out "$SIGNING_CONFIG" >/dev/null 2>&1 || true
+fi
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+PAYLOAD_FILE="$TMP_DIR/payload.json"
+BUNDLE_FILE="$TMP_DIR/bundle.json"
+echo "$PROVENANCE_PAYLOAD" > "$PAYLOAD_FILE"
+
+log_info "Signing provenance note for commit ${COMMIT_SHA:0:8} using key: $KEY_PATH..."
+
+SIGN_ARGS=(sign-blob --key "$KEY_PATH" --bundle "$BUNDLE_FILE" --yes)
+if [[ -f "$SIGNING_CONFIG" ]]; then
+    SIGN_ARGS+=(--signing-config "$SIGNING_CONFIG")
+fi
+
+cosign "${SIGN_ARGS[@]}" "$PAYLOAD_FILE"
+
+if [[ ! -s "$BUNDLE_FILE" ]]; then
+    log_error "Cosign failed to generate bundle signature."
+    exit 1
+fi
+
+BUNDLE_CONTENT="$(cat "$BUNDLE_FILE")"
+
+# Attach detached Sigstore bundle to parallel Git Notes ref
+git notes --ref="$SIG_REF" add -f -m "$BUNDLE_CONTENT" "$COMMIT_SHA" >/dev/null
+
+log_ok "Cryptographic bundle signature stored in ${SIG_REF} for commit ${COMMIT_SHA:0:8}"
