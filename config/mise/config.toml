@@ -1,0 +1,17 @@
+# Looping Llama - Hermetic Base Toolchain Manifest
+# Managed via mise: https://mise.jdx.dev
+
+[tools]
+python = "3.12"
+node = "22"
+starship = "latest"
+bat = "latest"
+eza = "latest"
+just = "latest"
+yq = "latest"
+jq = "latest"
+cosign = "latest"
+
+[settings]
+experimental = true
+legacy_version_file = false
