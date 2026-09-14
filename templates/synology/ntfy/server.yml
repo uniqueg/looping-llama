@@ -1,0 +1,21 @@
+# Synology Container Manager - ntfy Server Configuration
+# /volume1/docker/ntfy/server.yml
+
+base-url: "https://ntfy.yourdomain.com"
+listen-http: ":80"
+behind-proxy: true
+
+# Cache and persistence on Synology volume
+cache-file: "/var/cache/ntfy/cache.db"
+cache-duration: "12h"
+attachment-cache-dir: "/var/cache/ntfy/attachments"
+attachment-total-size-limit: "2G"
+attachment-file-size-limit: "15M"
+
+# Zero-trust Access Control & Authentication
+auth-file: "/var/lib/ntfy/user.db"
+auth-default-access: "deny-all"
+
+# Egress rate-limits (protects upstream mobile relays)
+visitor-subscription-limit: 30
+visitor-attachment-total-size-limit: "100M"
