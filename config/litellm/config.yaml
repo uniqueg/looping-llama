@@ -1,0 +1,46 @@
+model_list:
+  - model_name: tier-micro
+    litellm_params:
+      model: gemini/gemini-flash-lite-latest
+      api_key: os.environ/GEMINI_API_KEY
+    model_info:
+      max_tokens: 8192
+
+  - model_name: tier-workhorse
+    litellm_params:
+      model: gemini/gemini-flash-latest
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: tier-frontier
+    litellm_params:
+      model: gemini/gemini-pro-latest
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: tier-reasoning
+    litellm_params:
+      model: gemini/gemini-pro-latest
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: "*"
+    litellm_params:
+      model: gemini/gemini-flash-latest
+      api_key: os.environ/GEMINI_API_KEY
+
+litellm_settings:
+  request_timeout: 180
+  num_retries: 3
+  retry_after: 2
+  allowed_fails: 2
+  cooldown_time: 60
+  drop_params: true
+  stream_response: true
+  callbacks: ["gemini_fixer.proxy_handler_instance"]
+
+  fallbacks:
+    - tier-workhorse: ["gemini/gemini-flash-latest"]
+    - tier-micro: ["gemini/gemini-flash-lite-latest"]
+
+  cache: false
+
+router_settings:
+  routing_strategy: "cost-based-routing"

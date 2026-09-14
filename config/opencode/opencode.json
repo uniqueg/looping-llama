@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "providers": {
+    "litellm": {
+      "type": "openai",
+      "baseUrl": "http://127.0.0.1:4000/v1",
+      "apiKey": "sk-looping-llama-local-master",
+      "models": [
+        "tier-micro",
+        "tier-workhorse",
+        "tier-frontier",
+        "tier-reasoning"
+      ]
+    }
+  },
+  "defaultProvider": "litellm"
+}
