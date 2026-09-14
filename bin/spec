@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/loop"
+MODEL="litellm/tier-reasoning"
+OUTPUT_FILE="TASK.md"
+NON_INTERACTIVE=false
+ROLE=""
+INITIAL_GOAL=""
+
+# ANSI Colors
+BOLD="\033[1m"
+GREEN="\033[0;32m"
+BLUE="\033[0;34m"
+YELLOW="\033[0;33m"
+CYAN="\033[0;36m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+log_info() { echo -e "${BLUE}[INFO]${RESET} $1"; }
+log_ok()   { echo -e "${GREEN}[OK]${RESET} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${RESET} $1"; }
+log_err()  { echo -e "${RED}[ERROR]${RESET} $1"; exit 1; }
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --output|-o)
+      OUTPUT_FILE="$2"
+      shift 2
+      ;;
+    --role|-r)
+      ROLE="$2"
+      shift 2
+      ;;
+    --model|-m)
+      MODEL="$2"
+      shift 2
+      ;;
+    --yes|-y|--non-interactive)
+      NON_INTERACTIVE=true
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: spec [OPTIONS] \"<high-level goal>\""
+      echo ""
+      echo "Options:"
+      echo "  -o, --output <file>     Output specification file (default: TASK.md)"
+      echo "  -r, --role <role>       Target role context (e.g. swe, devops, bio)"
+      echo "  -m, --model <tier>      Model tier to use (default: litellm/tier-reasoning)"
+      echo "  -y, --non-interactive   Skip interactive clarification round"
+      exit 0
+      ;;
+    *)
+      if [ -z "$INITIAL_GOAL" ]; then
+        INITIAL_GOAL="$1"
+      else
+        INITIAL_GOAL="$INITIAL_GOAL $1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$INITIAL_GOAL" ]; then
+  echo -e "${BOLD}🦙 Looping Llama - Specification Elicitor${RESET}"
+  echo "Describe the feature, architecture change, or problem to solve:"
+  read -r -p "> " INITIAL_GOAL
+fi
+
+[ -z "$INITIAL_GOAL" ] && log_err "Goal cannot be empty."
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+# Gather repository context
+CONTEXT_DIGEST=""
+if [ -f "$REPO_ROOT/justfile" ]; then
+  CONTEXT_DIGEST="${CONTEXT_DIGEST}\nAvailable verification targets in justfile:\n$(grep -E '^[a-zA-Z_-]+:' "$REPO_ROOT/justfile" | cut -d: -f1 | sed 's/^/  - /')"
+fi
+if [ -d "$REPO_ROOT/.context/rules" ]; then
+  CONTEXT_DIGEST="${CONTEXT_DIGEST}\nProject Rules:\n$(head -n 40 "$REPO_ROOT/.context/rules/"*.md 2>/dev/null || true)"
+fi
+
+# Stage 1: Intent & Trade-off Analysis
+echo -e "\n${BOLD}Stage 1: Analyzing Intent & Architectural Boundaries...${RESET}"
+
+STAGE1_PROMPT="You are a Principal Software Architect and Systems Designer.
+Analyze this proposed goal for a project:
+Goal: \"${INITIAL_GOAL}\"
+Target Role: ${ROLE:-auto}
+
+Context:
+${CONTEXT_DIGEST}
+
+Identify:
+1. Ambiguities or hidden assumptions in this request.
+2. Key architectural trade-offs (e.g., performance vs. complexity, storage vs. compute).
+3. Verification strategy: How will this be proven with exit-code-0 tests?
+4. Exactly 2-4 clarifying questions that must be answered to produce a deterministic build spec.
+
+Keep output crisp and structured."
+
+log_info "Consulting architectural reasoning model ($MODEL)..."
+STAGE1_RESPONSE="$(opencode run --model "$MODEL" "$STAGE1_PROMPT")"
+
+echo -e "\n${CYAN}--- Architectural Assessment ---${RESET}"
+echo "$STAGE1_RESPONSE"
+echo -e "${CYAN}--------------------------------${RESET}\n"
+
+ANSWERS=""
+if [ "$NON_INTERACTIVE" = false ] && [ -t 0 ]; then
+  echo -e "${BOLD}Please provide clarification / preferences (or press Enter to proceed with defaults):${RESET}"
+  read -r -p "> " ANSWERS
+fi
+
+# Stage 2: Synthesis into Actionable TASK.md
+echo -e "\n${BOLD}Stage 2: Synthesizing Verifiable Task Specification (${OUTPUT_FILE})...${RESET}"
+
+STAGE2_PROMPT="You are a Principal Software Architect.
+Produce a production-grade TASK.md specification ready for an autonomous agent execution loop.
+
+Original Goal: \"${INITIAL_GOAL}\"
+Architectural Analysis:
+${STAGE1_RESPONSE}
+
+User Decisions / Clarifications:
+${ANSWERS:-Proceeding with standard architectural best practices.}
+
+Context:
+${CONTEXT_DIGEST}
+
+Format the specification as clean Markdown with the following exact sections:
+# Task: <Crisp Title>
+
+## 1. Intent & Scope
+- Summary of change
+- Explicit out-of-scope boundaries
+
+## 2. Invariants & Constraints
+- Security, performance, and API stability rules
+
+## 3. Verification Contract
+- Explicit 'just' target or command that asserts correctness
+- Concrete passing criteria (exit code 0)
+
+## 4. Implementation Checklist
+- [ ] Ordered, atomic, verifiable steps
+- [ ] Each step must specify affected files or subsystems
+
+Output ONLY the raw markdown content. Do not wrap in meta-commentary."
+
+FINAL_SPEC="$(opencode run --model "$MODEL" "$STAGE2_PROMPT")"
+
+echo "$FINAL_SPEC" > "$OUTPUT_FILE"
+log_ok "Task specification written to ${BOLD}${OUTPUT_FILE}${RESET}"
+echo -e "\nRun with: ${GREEN}llama \"\$(cat ${OUTPUT_FILE})\"${RESET}"
