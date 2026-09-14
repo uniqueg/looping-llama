@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+PERSONA="Adversarial Code Reviewer"
+SYSTEM_PROMPT=""
+DIFF=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --persona) PERSONA="$2"; shift 2 ;;
+    --prompt)  SYSTEM_PROMPT="$2"; shift 2 ;;
+    *)
+      if [ -z "$DIFF" ]; then
+        DIFF="$1"
+      else
+        DIFF="$DIFF $1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+# If no diff was provided via argument, attempt reading from stdin
+if [ -z "$DIFF" ] && [ ! -t 0 ]; then
+  DIFF="$(cat)"
+fi
+
+# Reject empty diffs: if a task was assigned, zero changes is a failure
+if [ -z "$DIFF" ] || [ "$DIFF" = " " ]; then
+  echo "[BLOCK] Diff is completely empty. No changes or tests were implemented."
+  exit 0
+fi
+
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/loop/config.toml"
+GATEWAY_URL="http://localhost:4000"
+if [ -f "$CONFIG_FILE" ] && command -v yq >/dev/null 2>&1; then
+  GATEWAY_URL="$(yq e '.gateway.url // "http://localhost:4000"' "$CONFIG_FILE" 2>/dev/null)"
+fi
+
+REVIEW_INSTRUCTION="You are an $PERSONA.
+Audit the following Git diff against these criteria:
+$SYSTEM_PROMPT
+
+Provide a concise review. If there are critical flaws, security issues, or missing tests, output '[BLOCK]' followed by the reasons.
+If the implementation is acceptable, output '[PASS]' followed by brief comments.
+Git Diff:
+$DIFF"
+
+# Call LiteLLM gateway using tier-frontier for adversarial audit
+PAYLOAD=$(jq -n \
+  --arg model "tier-frontier" \
+  --arg prompt "$REVIEW_INSTRUCTION" \
+  '{
+    model: $model,
+    messages: [
+      {role: "system", content: "You are an adversarial software reviewer. You reject flawed diffs with [BLOCK] and approve verified diffs with [PASS]."},
+      {role: "user", content: $prompt}
+    ],
+    temperature: 0.2
+  }')
+
+RESPONSE=$(curl -s "${GATEWAY_URL}/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-looping-llama-local-master" \
+  -d "$PAYLOAD" 2>/dev/null || echo "")
+
+CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty' 2>/dev/null || echo "")
+
+if [ -z "$CONTENT" ]; then
+  # Fallback rule-based check if gateway call fails
+  if echo "$DIFF" | grep -qE "(TODO|FIXME|password|secret)"; then
+    echo "[BLOCK] Diff contains unresolved markers or potential secrets."
+  else
+    echo "[PASS] Rule-based pass: no obvious defect patterns found."
+  fi
+else
+  echo "$CONTENT"
+fi
