@@ -194,6 +194,7 @@ done
 ITERATION=1
 DIFF_HASHES=()
 ERROR_LOG=""
+IDEMPOTENT_SUCCESS=false
 
 compact_errors() {
   local raw="$1"
@@ -232,14 +233,27 @@ while [ "$ITERATION" -le "$MAX_ITERATIONS" ]; do
   log_info "Maker (${CURRENT_TIER}) generating updates..."
   MAKER_LOG="$(mktemp)"
   set +e
-  OPENAI_BASE_URL="http://127.0.0.1:4000/v1" OPENAI_API_KEY="sk-looping-llama-local-master" opencode run --model "litellm/${CURRENT_TIER}" "$(echo -e "$MAKER_PROMPT")" > "$MAKER_LOG" 2>&1
+  opencode run --auto --model "litellm/${CURRENT_TIER}" "$(echo -e "$MAKER_PROMPT")" > "$MAKER_LOG" 2>&1
   MAKER_EXIT=$?
   set -e
 
-  # Gate 1: Check if Maker actually created or edited any files
+  # Gate 1: Check if Maker actually created or edited any files (Idempotency Check)
   DIRTY_FILES="$(git status --porcelain)"
   if [ -z "$DIRTY_FILES" ]; then
-    log_warn "Maker completed without modifying or creating any files (exit code: $MAKER_EXIT)."
+    log_info "No files modified. Verifying if existing state already satisfies task..."
+    set +e
+    just "$VERIFY_TARGET" >/dev/null 2>&1
+    ALREADY_PASSES=$?
+    set -e
+
+    if [ $ALREADY_PASSES -eq 0 ]; then
+      log_ok "Task is already satisfied by existing code!"
+      IDEMPOTENT_SUCCESS=true
+      rm -f "$MAKER_LOG"
+      break
+    fi
+
+    log_warn "Maker completed without modifying files, and verification still fails."
     CLEAN_MAKER="$(cat "$MAKER_LOG" | scrub_secrets)"
     ERROR_LOG="Maker produced no file changes.\nOutput:\n$(compact_errors "$CLEAN_MAKER")"
     rm -f "$MAKER_LOG"
@@ -253,8 +267,9 @@ while [ "$ITERATION" -le "$MAX_ITERATIONS" ]; do
   fi
   rm -f "$MAKER_LOG"
 
+  git add -A
   # Gate 2: Circuit Breaker Diff Hashing
-  CURRENT_DIFF_HASH=$(git diff | sha256sum | awk '{print $1}')
+  CURRENT_DIFF_HASH=$(git diff HEAD | sha256sum | awk '{print $1}')
   for past_hash in "${DIFF_HASHES[@]}"; do
     if [ "$past_hash" = "$CURRENT_DIFF_HASH" ] && [ -n "$CURRENT_DIFF_HASH" ]; then
       log_breaker "Oscillation detected! Identical diff state observed."
@@ -306,6 +321,7 @@ while [ "$ITERATION" -le "$MAX_ITERATIONS" ]; do
 
   if echo "$REVIEW_OUT" | grep -q "\[BLOCK\]"; then
     log_warn "Adversarial Checker rejected the diff with blockers."
+    echo -e "${YELLOW}--- Checker Feedback ---${RESET}\n$REVIEW_OUT\n------------------------"
     ERROR_LOG="Adversarial Review Blockers:\n$REVIEW_OUT"
     ITERATION=$((ITERATION + 1))
     continue
@@ -319,6 +335,11 @@ if [ "$ITERATION" -gt "$MAX_ITERATIONS" ]; then
   notify "Looping Llama" "Task failed after ${MAX_ITERATIONS} iterations: ${TASK}"
   log_err "Maximum iterations exceeded. Rolling back."
   exit 1
+fi
+
+if [ "$IDEMPOTENT_SUCCESS" = true ]; then
+  log_info "No commit necessary. Cleaning up..."
+  exit 0
 fi
 
 # Commit and Merge
@@ -341,7 +362,12 @@ git merge --ff-only "$WORKTREE_BRANCH" >/dev/null 2>&1 || git merge "$WORKTREE_B
 # Provenance & Notifications
 log_info "Recording provenance trace..."
 record-provenance --commit "$COMMIT_HASH" --task "$TASK" --role "$RESOLVED_ROLE" --scope "$RESOLVED_SCOPE" || true
-COSIGN_PASSWORD="${COSIGN_PASSWORD:-}" sign-provenance --commit "$COMMIT_HASH" --scope "$RESOLVED_SCOPE" || true
+
+if COSIGN_PASSWORD="${COSIGN_PASSWORD:-}" sign-provenance --commit "$COMMIT_HASH" --scope "$RESOLVED_SCOPE" 2>/dev/null; then
+  log_info "Provenance signature attached."
+else
+  log_info "Provenance signature skipped (no key found or configured)."
+fi
 
 notify "Looping Llama Task Complete" "Verified commit ${COMMIT_HASH:0:8} for task: '${TASK}'"
 log_ok "Task completed successfully."
