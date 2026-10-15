@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "agent-stack: no agent for PERSONA=${PERSONA:-none} (Team seat is excluded from Private; see agent-stack/later/)." >&2
+exit 1

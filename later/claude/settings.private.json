@@ -1,0 +1,5 @@
+{
+  "apiKeyHelper": "gopass show -o llm/anthropic/api",
+  "model": "sonnet",
+  "cleanupPeriodDays": 30
+}

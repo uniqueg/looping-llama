@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Run OpenCode with API keys injected from gopass for this process only.
+# Keys stay out of shell profiles and files; see R3 notes in the handover response.
+# --standalone: OpenCode v2 otherwise reuses a shared background service that
+# would not see the injected environment.
+set -euo pipefail
+GEMINI_API_KEY=$(gopass show -o llm/google/api)
+export GEMINI_API_KEY
+if [[ ${1:-} == run ]]; then shift; exec opencode run --standalone "$@"; fi
+exec opencode --standalone "$@"

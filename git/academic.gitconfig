@@ -1,0 +1,5 @@
+[user]
+	name = Alexander Kanitz
+	email = alexander.kanitz@unibas.ch
+[core]
+	sshCommand = ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes

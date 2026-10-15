@@ -1,0 +1,5 @@
+[user]
+	name = Alexander Kanitz
+	email = TODO-work-email
+[core]
+	sshCommand = ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes

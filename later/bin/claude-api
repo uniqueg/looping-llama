@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Run Claude Code on the pay-per-token Anthropic API instead of the Team seat,
+# e.g. when the subscription quota is exhausted. The key is fetched by
+# apiKeyHelper at runtime and never enters the shell environment.
+exec claude --settings '{"apiKeyHelper":"gopass show -o llm/anthropic/api"}' "$@"

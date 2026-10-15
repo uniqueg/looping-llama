@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Second-model review from a different model family (Gemini via OpenCode).
+# Usage: cross-review [base-branch]   (run inside the worktree/branch to review)
+# Read-only: the cross-reviewer agent cannot edit files or run non-git commands.
+set -euo pipefail
+base=${1:-$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's#^origin/##' || echo main)}
+exec "$(dirname "$0")/oc" run --agent cross-reviewer \
+  "Review the changes on this branch relative to '$base' (use: git diff $base...HEAD and git log $base..HEAD)."

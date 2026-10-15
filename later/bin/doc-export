@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Export a Markdown document with citations to PDF or DOCX.
+# Usage: doc-export <file.md> pdf|docx [bibliography.bib]
+# PDF uses Typst (single binary, no TeX install). Verifies citations first.
+set -euo pipefail
+src=${1:?usage: doc-export <file.md> pdf|docx [refs.bib]}
+fmt=${2:?format: pdf|docx}
+bib=${3:-$(dirname "$src")/refs.bib}
+out="${src%.md}.$fmt"
+args=(--standalone --citeproc)
+if [[ -f $bib ]]; then
+  "$(dirname "$0")/verify-citations" "$bib" --text "$src"
+  args+=(--bibliography "$bib")
+fi
+[[ $fmt == pdf ]] && args+=(--pdf-engine=typst)
+pandoc "${args[@]}" -o "$out" "$src"
+echo "wrote $out"

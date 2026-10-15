@@ -1,0 +1,5 @@
+[user]
+	name = Alexander Kanitz
+	email = TODO-private-email
+[core]
+	sshCommand = ssh -i ~/.ssh/id_ed25519_private -o IdentitiesOnly=yes
