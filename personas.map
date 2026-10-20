@@ -1,6 +1,6 @@
-# <directory under $WORK_ROOT>   <persona: academic|none>
-# none = no agent: `claude` is blocked there so the Team seat never serves Private.
-private            none
+# <directory under $WORK_ROOT>   <persona: academic|personal|work|none>
+# none = no agent: `claude` is blocked there
+private            personal
 biozentrum         academic
 elixir             academic
 ga4gh              academic

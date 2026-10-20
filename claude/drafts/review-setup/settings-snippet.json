@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/Work/agent-stack/claude/hooks/pre-push-checks.sh",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

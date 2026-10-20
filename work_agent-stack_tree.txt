@@ -1,0 +1,323 @@
+ /home/uniqueg/Work/agent-stack
+├──  claude
+│   ├──  CLAUDE.md
+│   ├──  settings.base.json
+│   └──  skills
+│       ├──  architect
+│       │   └──  SKILL.md
+│       ├──  code-reviewer
+│       │   └──  SKILL.md
+│       ├──  implement-issue
+│       │   ├──  codeowners.py
+│       │   └──  SKILL.md
+│       ├──  software-engineer
+│       │   └──  SKILL.md
+│       └──  synced
+│           └──  2578c803-b8f5-4aae-9378-1c2cc133cdcf_7298327f-2de2-4bdf-805c-936f780ba230
+│               ├──  docs
+│               │   └──  SKILL.md
+│               ├──  docx
+│               │   ├──  LICENSE.txt
+│               │   ├──  scripts
+│               │   │   ├──  __init__.py
+│               │   │   ├──  accept_changes.py
+│               │   │   ├──  comment.py
+│               │   │   ├──  merge_runs.py
+│               │   │   ├──  office
+│               │   │   │   ├──  helpers
+│               │   │   │   │   ├──  __init__.py
+│               │   │   │   │   ├──  pptx_chart.py
+│               │   │   │   │   ├──  pptx_slide.py
+│               │   │   │   │   └──  pptx_theme.py
+│               │   │   │   ├──  schemas
+│               │   │   │   │   ├──  ecma
+│               │   │   │   │   │   └──  fouth-edition
+│               │   │   │   │   │       ├──  opc-contentTypes.xsd
+│               │   │   │   │   │       ├──  opc-coreProperties.xsd
+│               │   │   │   │   │       ├──  opc-digSig.xsd
+│               │   │   │   │   │       └──  opc-relationships.xsd
+│               │   │   │   │   ├──  ISO-IEC29500-4_2016
+│               │   │   │   │   │   ├──  dml-chart.xsd
+│               │   │   │   │   │   ├──  dml-chartDrawing.xsd
+│               │   │   │   │   │   ├──  dml-diagram.xsd
+│               │   │   │   │   │   ├──  dml-lockedCanvas.xsd
+│               │   │   │   │   │   ├──  dml-main.xsd
+│               │   │   │   │   │   ├──  dml-picture.xsd
+│               │   │   │   │   │   ├──  dml-spreadsheetDrawing.xsd
+│               │   │   │   │   │   ├──  dml-wordprocessingDrawing.xsd
+│               │   │   │   │   │   ├──  pml.xsd
+│               │   │   │   │   │   ├──  shared-additionalCharacteristics.xsd
+│               │   │   │   │   │   ├──  shared-bibliography.xsd
+│               │   │   │   │   │   ├──  shared-commonSimpleTypes.xsd
+│               │   │   │   │   │   ├──  shared-customXmlDataProperties.xsd
+│               │   │   │   │   │   ├──  shared-customXmlSchemaProperties.xsd
+│               │   │   │   │   │   ├──  shared-documentPropertiesCustom.xsd
+│               │   │   │   │   │   ├──  shared-documentPropertiesExtended.xsd
+│               │   │   │   │   │   ├──  shared-documentPropertiesVariantTypes.xsd
+│               │   │   │   │   │   ├──  shared-math.xsd
+│               │   │   │   │   │   ├──  shared-relationshipReference.xsd
+│               │   │   │   │   │   ├──  sml.xsd
+│               │   │   │   │   │   ├──  vml-main.xsd
+│               │   │   │   │   │   ├──  vml-officeDrawing.xsd
+│               │   │   │   │   │   ├──  vml-presentationDrawing.xsd
+│               │   │   │   │   │   ├──  vml-spreadsheetDrawing.xsd
+│               │   │   │   │   │   ├──  vml-wordprocessingDrawing.xsd
+│               │   │   │   │   │   ├──  wml.xsd
+│               │   │   │   │   │   └──  xml.xsd
+│               │   │   │   │   ├──  mce
+│               │   │   │   │   │   └──  mc.xsd
+│               │   │   │   │   └──  microsoft
+│               │   │   │   │       ├──  wml-2010.xsd
+│               │   │   │   │       ├──  wml-2012.xsd
+│               │   │   │   │       ├──  wml-2018.xsd
+│               │   │   │   │       ├──  wml-cex-2018.xsd
+│               │   │   │   │       ├──  wml-cid-2016.xsd
+│               │   │   │   │       ├──  wml-sdtdatahash-2020.xsd
+│               │   │   │   │       └──  wml-symex-2015.xsd
+│               │   │   │   ├──  soffice.py
+│               │   │   │   ├──  validate.py
+│               │   │   │   └──  validators
+│               │   │   │       ├──  __init__.py
+│               │   │   │       ├──  base.py
+│               │   │   │       ├──  docx.py
+│               │   │   │       ├──  pptx.py
+│               │   │   │       └──  redlining.py
+│               │   │   └──  templates
+│               │   │       ├── 󰗀 comments.xml
+│               │   │       ├── 󰗀 commentsExtended.xml
+│               │   │       ├── 󰗀 commentsExtensible.xml
+│               │   │       ├── 󰗀 commentsIds.xml
+│               │   │       └── 󰗀 people.xml
+│               │   └──  SKILL.md
+│               ├──  google-workspace
+│               │   ├──  references
+│               │   │   ├──  charts.md
+│               │   │   ├──  docs.md
+│               │   │   ├──  sheets.md
+│               │   │   └──  slides.md
+│               │   ├──  scripts
+│               │   │   ├──  docs_index.py
+│               │   │   ├──  render_export.py
+│               │   │   ├──  sheets_helper.py
+│               │   │   └──  slides_helper.py
+│               │   └──  SKILL.md
+│               ├──  import-memory
+│               │   └──  SKILL.md
+│               ├──  manifest.json
+│               ├──  morning
+│               │   ├──  assets
+│               │   │   └──  fonts
+│               │   │       ├──  fraunces-latin-600-normal.woff2
+│               │   │       └──  Fraunces-OFL.txt
+│               │   └──  SKILL.md
+│               ├──  pdf
+│               │   ├──  FORMS.md
+│               │   ├──  LICENSE.txt
+│               │   ├──  REFERENCE.md
+│               │   ├──  scripts
+│               │   │   ├──  check_bounding_boxes.py
+│               │   │   ├──  check_fillable_fields.py
+│               │   │   ├──  convert_pdf_to_images.py
+│               │   │   ├──  create_validation_image.py
+│               │   │   ├──  extract_form_field_info.py
+│               │   │   ├──  extract_form_structure.py
+│               │   │   ├──  fill_fillable_fields.py
+│               │   │   └──  fill_pdf_form_with_annotations.py
+│               │   └──  SKILL.md
+│               ├──  pptx
+│               │   ├──  LICENSE.txt
+│               │   ├──  scripts
+│               │   │   ├──  __init__.py
+│               │   │   ├──  add_slide.py
+│               │   │   ├──  apply_theme.js
+│               │   │   ├──  clean.py
+│               │   │   ├──  office
+│               │   │   │   ├──  helpers
+│               │   │   │   │   ├──  __init__.py
+│               │   │   │   │   ├──  pptx_chart.py
+│               │   │   │   │   ├──  pptx_slide.py
+│               │   │   │   │   └──  pptx_theme.py
+│               │   │   │   ├──  schemas
+│               │   │   │   │   ├──  ecma
+│               │   │   │   │   │   └──  fouth-edition
+│               │   │   │   │   │       ├──  opc-contentTypes.xsd
+│               │   │   │   │   │       ├──  opc-coreProperties.xsd
+│               │   │   │   │   │       ├──  opc-digSig.xsd
+│               │   │   │   │   │       └──  opc-relationships.xsd
+│               │   │   │   │   ├──  ISO-IEC29500-4_2016
+│               │   │   │   │   │   ├──  dml-chart.xsd
+│               │   │   │   │   │   ├──  dml-chartDrawing.xsd
+│               │   │   │   │   │   ├──  dml-diagram.xsd
+│               │   │   │   │   │   ├──  dml-lockedCanvas.xsd
+│               │   │   │   │   │   ├──  dml-main.xsd
+│               │   │   │   │   │   ├──  dml-picture.xsd
+│               │   │   │   │   │   ├──  dml-spreadsheetDrawing.xsd
+│               │   │   │   │   │   ├──  dml-wordprocessingDrawing.xsd
+│               │   │   │   │   │   ├──  pml.xsd
+│               │   │   │   │   │   ├──  shared-additionalCharacteristics.xsd
+│               │   │   │   │   │   ├──  shared-bibliography.xsd
+│               │   │   │   │   │   ├──  shared-commonSimpleTypes.xsd
+│               │   │   │   │   │   ├──  shared-customXmlDataProperties.xsd
+│               │   │   │   │   │   ├──  shared-customXmlSchemaProperties.xsd
+│               │   │   │   │   │   ├──  shared-documentPropertiesCustom.xsd
+│               │   │   │   │   │   ├──  shared-documentPropertiesExtended.xsd
+│               │   │   │   │   │   ├──  shared-documentPropertiesVariantTypes.xsd
+│               │   │   │   │   │   ├──  shared-math.xsd
+│               │   │   │   │   │   ├──  shared-relationshipReference.xsd
+│               │   │   │   │   │   ├──  sml.xsd
+│               │   │   │   │   │   ├──  vml-main.xsd
+│               │   │   │   │   │   ├──  vml-officeDrawing.xsd
+│               │   │   │   │   │   ├──  vml-presentationDrawing.xsd
+│               │   │   │   │   │   ├──  vml-spreadsheetDrawing.xsd
+│               │   │   │   │   │   ├──  vml-wordprocessingDrawing.xsd
+│               │   │   │   │   │   ├──  wml.xsd
+│               │   │   │   │   │   └──  xml.xsd
+│               │   │   │   │   ├──  mce
+│               │   │   │   │   │   └──  mc.xsd
+│               │   │   │   │   └──  microsoft
+│               │   │   │   │       ├──  wml-2010.xsd
+│               │   │   │   │       ├──  wml-2012.xsd
+│               │   │   │   │       ├──  wml-2018.xsd
+│               │   │   │   │       ├──  wml-cex-2018.xsd
+│               │   │   │   │       ├──  wml-cid-2016.xsd
+│               │   │   │   │       ├──  wml-sdtdatahash-2020.xsd
+│               │   │   │   │       └──  wml-symex-2015.xsd
+│               │   │   │   ├──  soffice.py
+│               │   │   │   ├──  validate.py
+│               │   │   │   └──  validators
+│               │   │   │       ├──  __init__.py
+│               │   │   │       ├──  base.py
+│               │   │   │       ├──  docx.py
+│               │   │   │       ├──  pptx.py
+│               │   │   │       └──  redlining.py
+│               │   │   └──  thumbnail.py
+│               │   └──  SKILL.md
+│               ├──  skill-creator
+│               │   ├──  agents
+│               │   │   ├──  analyzer.md
+│               │   │   ├──  comparator.md
+│               │   │   └──  grader.md
+│               │   ├──  assets
+│               │   │   └──  eval_review.html
+│               │   ├──  eval-viewer
+│               │   │   ├──  generate_review.py
+│               │   │   └──  viewer.html
+│               │   ├──  LICENSE.txt
+│               │   ├──  references
+│               │   │   └──  schemas.md
+│               │   ├──  scripts
+│               │   │   ├──  __init__.py
+│               │   │   ├──  aggregate_benchmark.py
+│               │   │   ├──  generate_report.py
+│               │   │   ├──  improve_description.py
+│               │   │   ├──  package_skill.py
+│               │   │   ├──  quick_validate.py
+│               │   │   ├──  run_eval.py
+│               │   │   ├──  run_loop.py
+│               │   │   └──  utils.py
+│               │   └──  SKILL.md
+│               └──  xlsx
+│                   ├──  LICENSE.txt
+│                   ├──  scripts
+│                   │   ├──  office
+│                   │   │   ├──  helpers
+│                   │   │   │   ├──  __init__.py
+│                   │   │   │   ├──  pptx_chart.py
+│                   │   │   │   ├──  pptx_slide.py
+│                   │   │   │   └──  pptx_theme.py
+│                   │   │   ├──  schemas
+│                   │   │   │   ├──  ecma
+│                   │   │   │   │   └──  fouth-edition
+│                   │   │   │   │       ├──  opc-contentTypes.xsd
+│                   │   │   │   │       ├──  opc-coreProperties.xsd
+│                   │   │   │   │       ├──  opc-digSig.xsd
+│                   │   │   │   │       └──  opc-relationships.xsd
+│                   │   │   │   ├──  ISO-IEC29500-4_2016
+│                   │   │   │   │   ├──  dml-chart.xsd
+│                   │   │   │   │   ├──  dml-chartDrawing.xsd
+│                   │   │   │   │   ├──  dml-diagram.xsd
+│                   │   │   │   │   ├──  dml-lockedCanvas.xsd
+│                   │   │   │   │   ├──  dml-main.xsd
+│                   │   │   │   │   ├──  dml-picture.xsd
+│                   │   │   │   │   ├──  dml-spreadsheetDrawing.xsd
+│                   │   │   │   │   ├──  dml-wordprocessingDrawing.xsd
+│                   │   │   │   │   ├──  pml.xsd
+│                   │   │   │   │   ├──  shared-additionalCharacteristics.xsd
+│                   │   │   │   │   ├──  shared-bibliography.xsd
+│                   │   │   │   │   ├──  shared-commonSimpleTypes.xsd
+│                   │   │   │   │   ├──  shared-customXmlDataProperties.xsd
+│                   │   │   │   │   ├──  shared-customXmlSchemaProperties.xsd
+│                   │   │   │   │   ├──  shared-documentPropertiesCustom.xsd
+│                   │   │   │   │   ├──  shared-documentPropertiesExtended.xsd
+│                   │   │   │   │   ├──  shared-documentPropertiesVariantTypes.xsd
+│                   │   │   │   │   ├──  shared-math.xsd
+│                   │   │   │   │   ├──  shared-relationshipReference.xsd
+│                   │   │   │   │   ├──  sml.xsd
+│                   │   │   │   │   ├──  vml-main.xsd
+│                   │   │   │   │   ├──  vml-officeDrawing.xsd
+│                   │   │   │   │   ├──  vml-presentationDrawing.xsd
+│                   │   │   │   │   ├──  vml-spreadsheetDrawing.xsd
+│                   │   │   │   │   ├──  vml-wordprocessingDrawing.xsd
+│                   │   │   │   │   ├──  wml.xsd
+│                   │   │   │   │   └──  xml.xsd
+│                   │   │   │   ├──  mce
+│                   │   │   │   │   └──  mc.xsd
+│                   │   │   │   └──  microsoft
+│                   │   │   │       ├──  wml-2010.xsd
+│                   │   │   │       ├──  wml-2012.xsd
+│                   │   │   │       ├──  wml-2018.xsd
+│                   │   │   │       ├──  wml-cex-2018.xsd
+│                   │   │   │       ├──  wml-cid-2016.xsd
+│                   │   │   │       ├──  wml-sdtdatahash-2020.xsd
+│                   │   │   │       └──  wml-symex-2015.xsd
+│                   │   │   ├──  soffice.py
+│                   │   │   ├──  validate.py
+│                   │   │   └──  validators
+│                   │   │       ├──  __init__.py
+│                   │   │       ├──  base.py
+│                   │   │       ├──  docx.py
+│                   │   │       ├──  pptx.py
+│                   │   │       └──  redlining.py
+│                   │   └──  recalc.py
+│                   └──  SKILL.md
+├──  direnv
+│   ├──  academic.envrc
+│   ├──  no-agent
+│   │   └── 󰡯 claude
+│   └──  none.envrc
+├──  git
+│   └──  academic.gitconfig
+├──  later
+│   ├──  bin
+│   │   ├── 󰡯 claude-api
+│   │   ├── 󰡯 cross-review
+│   │   ├── 󰡯 doc-export
+│   │   ├── 󰡯 oc
+│   │   └── 󰡯 verify-citations
+│   ├──  claude
+│   │   ├──  hooks
+│   │   │   └──  guard-outward.py
+│   │   ├──  settings.private.json
+│   │   └──  skills
+│   │       └──  technical-writer
+│   │           └──  SKILL.md
+│   ├──  direnv
+│   │   ├──  private.envrc
+│   │   └──  work.envrc
+│   ├──  git
+│   │   ├──  private.gitconfig
+│   │   └──  work.gitconfig
+│   ├──  opencode
+│   │   ├──  agents
+│   │   │   └──  cross-reviewer.md
+│   │   └──  opencode.json
+│   └── 󰂺 README.md
+├──  link.sh
+├──  NOTES.md
+├──  personas.map
+├── 󰂺 README.md
+├──  sandbox
+│   └── 󰡯 apparmor-bwrap
+├── 󰡯 tmp
+├──  tmp2.txt
+└──  work_agent-stack.txt

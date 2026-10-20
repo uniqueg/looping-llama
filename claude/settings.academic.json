@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [ "Read(~/Work/private/**)" ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "denyRead": [ "~/Work/private" ]
+    }
+  }
+}

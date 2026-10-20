@@ -19,7 +19,7 @@ link() {  # link <target-in-repo> <path-in-home>
 }
 
 echo "== Claude Code profiles"
-for p in academic; do  # add personas here (work is parked in later/)
+for p in academic personal; do  # add personas here (work is parked in later/)
   cfg=$HOME/.claude-$p
   mkdir -p "$cfg"
   overlay=$AGENT_STACK/claude/settings.$p.json
@@ -43,6 +43,7 @@ PY
   fi
   link "$AGENT_STACK/claude/CLAUDE.md" "$cfg/CLAUDE.md"
   link "$AGENT_STACK/claude/skills" "$cfg/skills"
+  sed -i 's|^  link "$AGENT_STACK/claude/skills" "$cfg/skills"$|&\n  link "$AGENT_STACK/claude/agents" "$cfg/agents"|' link.sh
   mkdir -p "$HOME/.config/gh-$p" && chmod 700 "$HOME/.config/gh-$p"
 done
 
