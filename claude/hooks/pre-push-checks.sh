@@ -3,8 +3,9 @@
 # changes before Claude runs `git push`. Blocks the push (exit 2) and shows
 # the findings to Claude if any check fails. Other commands pass through.
 #
-# - semgrep: uses the repository's .semgrep.yml / .semgrep/ if present,
-#   otherwise $SEMGREP_CONFIGS (default: "p/python p/secrets").
+# - semgrep: uses $SEMGREP_CONFIGS (default: "p/python p/secrets"; set it
+#   to "" to disable), plus the repository's .semgrep.yml / .semgrep/ if
+#   present.
 # - ast-grep: runs only if the repository has an sgconfig.yml.
 # Missing tools are reported as a warning, not an error.
 
@@ -41,15 +42,16 @@ report=""
 
 if command -v semgrep >/dev/null 2>&1; then
     configs=()
-    if [[ -e .semgrep.yml || -d .semgrep ]]; then
-        [[ -e .semgrep.yml ]] && configs+=(--config .semgrep.yml)
-        [[ -d .semgrep ]] && configs+=(--config .semgrep)
-    else
-        for c in ${SEMGREP_CONFIGS:-p/python p/secrets}; do
-            configs+=(--config "$c")
-        done
-    fi
-    if ! out=$(semgrep scan --error --quiet --metrics=off "${configs[@]}" "${files[@]}" 2>&1); then
+    # Repository rules add to the defaults; ${VAR-default}: an explicitly
+    # empty SEMGREP_CONFIGS disables the defaults
+    for c in ${SEMGREP_CONFIGS-p/python p/secrets}; do
+        configs+=(--config "$c")
+    done
+    [[ -e .semgrep.yml ]] && configs+=(--config .semgrep.yml)
+    [[ -d .semgrep ]] && configs+=(--config .semgrep)
+    if [[ ${#configs[@]} -eq 0 ]]; then
+        report+=$'warning: no semgrep rules configured; skipped\n'
+    elif ! out=$(semgrep scan --error --quiet --metrics=off "${configs[@]}" "${files[@]}" 2>&1); then
         status=2
         report+=$'semgrep findings:\n'"$out"$'\n\n'
     fi
