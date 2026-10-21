@@ -120,3 +120,60 @@ Things I'll avoid because they would hit the guards:
   together (#70–#72), rebase #65, then (b).
 
 Everything is in the handoff memory, so a new session can pick it up.
+
+## Blocked
+
+- **RESOLVED (user changed the ruleset: 0 approvals required; #83 is
+  now CLEAN).** Previously, merging #83 needed an approving review:
+  (2026-10-20, session 3.) #83 has green CI and both Sourcery threads are
+  resolved, but GitHub reports `reviewDecision: REVIEW_REQUIRED`, so the PR
+  is `BLOCKED`. I can't approve my own PR, and I won't use an admin bypass.
+  To unblock: approve #83, or have a co-maintainer approve it. Then I merge
+  it under the overnight mandate. Until then I keep stacking PRs:
+  N2 → `ci/fix-ci`, N3+N4 → `build/packaging`.
+- **#89 (external, montionugera) vs. my #90: your call on closing #89.**
+  Both target #71/#72/#32/#40. #89's #72 fix is correct, but it does NOT
+  fully address #71/#40:
+  - its fixtures need `flask_pymongo`, so the suite cannot even load on
+    FOCA 0.14 (#65);
+  - its mock identity provider accepts tokens signed with any key (a forged
+    token gets 200).
+
+  I posted a review comment on #89 but did not close it. I plan to merge #90
+  once CI is green and Sourcery has reviewed it. GitHub then closes the
+  issues via #90; #89 stays open for you to close, with thanks.
+- **#68:** nothing needed. Your amendment (`strategy: Recreate`) is in the
+  issue body.
+- **Your unsigned commits block #65 and #66.** The first 3 commits of each
+  were committed as `alexander.kanitz@alumni.ethz.ch`. That address is not
+  verified on your GitHub account (`no_user`), so `required_signatures`
+  blocks the merge, even as a squash. Fixing this would take a force-push,
+  which I may not do.
+  - #65: I opened **#92**: the same tree as one signed squash commit, with
+    you as the author. I merge #92 once Sourcery is done. #65 stays open
+    for you to close.
+  - #66 (your draft): still blocked. Either rebase it onto `dev` with
+    re-signed commits and force-push it yourself, or tell me to recreate it
+    as a signed squash, like #92. For the future: verify the alumni address
+    on GitHub, or commit with the gmail identity in scratch clones.
+- **#99 (#68, MongoDB pin/auth/probes): needs your decision on the
+  default MongoDB version.** The draft PR is reviewed (two rounds) and
+  documented. Chart v2 used `mongo:noble`, which now resolves to MongoDB
+  9.0. Community Edition does not support binary downgrades, so with the
+  new default `mongo:7.0`, production must set `mongodb.image` to its
+  running version before upgrading. Options:
+  - (a) keep `mongo:7.0` as the default (it avoids the kernel bug
+    SERVER-121912) and rely on the docs;
+  - (b) default to what production runs (e.g., `mongo:9.0`).
+  Please check the production version; the command is in
+  `deployment/README.md`. #99 stays a draft until then.
+- **(c) is blocked on #62 / #66.**
+  - N10–N13 (#78–#81) are planned "after #62".
+  - #61, #59, #63 and #64 depend on #62, directly or via #61.
+  - #13 and #20 are large spec-changing features.
+  - N14 (#82) builds on #68 (#99, see above).
+  - #62 is implemented by your draft #66, which is blocked by its unsigned
+    commits (see above).
+  - To unblock, either re-sign and force-push #66 yourself, or tell me to
+    recreate it as a signed squash (like #92). I then rebase it on `dev`,
+    because #95–#98 changed the same files, and continue with (c).
