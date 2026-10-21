@@ -35,7 +35,9 @@ branch changes: `git -C <repo> diff <base>...HEAD` (plus `git log
 - Commit hygiene: commit messages that do not describe the change.
 
 Ignore pure formatting (handled by formatters) and matters of taste that
-the surrounding code does not settle.
+the surrounding code does not settle. Report low findings only if they
+affect behavior or are clearly misleading (e.g. docs that contradict the
+code); skip pure style nits.
 
 ## Verify before reporting
 
