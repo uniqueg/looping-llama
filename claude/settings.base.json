@@ -67,7 +67,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/Work/agent-stack/claude/hooks/pre-push-checks.sh",
+            "command": "$HOME/Work/private/looping-llama/claude/hooks/pre-push-checks.sh",
             "timeout": 300
           }
         ]

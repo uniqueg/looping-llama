@@ -9,14 +9,14 @@ useful item.
 ## A. Set up the adversarial reviewers (about 5 minutes, fish)
 
 I tested the `sed` and `jq` commands on copies of your files. Full details are
-in `~/Work/agent-stack/claude/drafts/review-setup/INSTALL.md`.
+in `~/Work/private/looping-llama/claude/drafts/review-setup/INSTALL.md`.
 
 ```fish
 # 1. Tools  (/usr/bin/sg is NOT ast-grep)
 mise use -g semgrep ast-grep pre-commit
 
 # 2. Move agents and hook into agent-stack
-cd ~/Work/agent-stack
+cd ~/Work/private/looping-llama
 mkdir -p claude/agents claude/hooks
 mv claude/drafts/review-setup/agents/*.md claude/agents/
 mv claude/drafts/review-setup/hooks/pre-push-checks.sh claude/hooks/
@@ -24,20 +24,20 @@ chmod +x claude/hooks/pre-push-checks.sh
 
 # 3. Link the agents into both profiles, and make link.sh keep doing it
 for p in personal academic
-    ln -sfn ~/Work/agent-stack/claude/agents ~/.claude-$p/agents
+    ln -sfn ~/Work/private/looping-llama/claude/agents ~/.claude-$p/agents
 end
 sed -i 's|^  link "$AGENT_STACK/claude/skills" "$cfg/skills"$|&\n  link "$AGENT_STACK/claude/agents" "$cfg/agents"|' link.sh
 
 # 4. Register the hook (run once; patches the live settings, not via link.sh)
-set snip ~/Work/agent-stack/claude/drafts/review-setup/settings-snippet.json
-for f in ~/.claude-personal/settings.json ~/.claude-academic/settings.json ~/Work/agent-stack/claude/settings.base.json
+set snip ~/Work/private/looping-llama/claude/drafts/review-setup/settings-snippet.json
+for f in ~/.claude-personal/settings.json ~/.claude-academic/settings.json ~/Work/private/looping-llama/claude/settings.base.json
     cp $f $f.bak.(date +%Y%m%d%H%M%S)
     jq --indent 2 --slurpfile s $snip '.hooks.PreToolUse = ((.hooks.PreToolUse // []) + $s[0].hooks.PreToolUse)' $f > $f.tmp
     and mv $f.tmp $f
 end
 
 # 5. CLAUDE.md: new step 6 "review before every push"; later steps renumbered
-cd ~/Work/agent-stack/claude
+cd ~/Work/private/looping-llama/claude
 diff CLAUDE.md drafts/review-setup/CLAUDE.md.new
 mv drafts/review-setup/CLAUDE.md.new CLAUDE.md
 ```
@@ -53,7 +53,7 @@ base, keeping only a backup.
 Optionally, commit agent-stack afterwards:
 
 ```fish
-cd ~/Work/agent-stack
+cd ~/Work/private/looping-llama
 git add claude/agents claude/hooks claude/CLAUDE.md claude/settings.base.json link.sh
 git commit -m "feat: add pre-push review gate"
 ```

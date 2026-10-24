@@ -22,7 +22,7 @@ semgrep --version; ast-grep --version; jq --version
 ## 2. Move agents and hook into agent-stack
 
 ```fish
-cd ~/Work/agent-stack
+cd ~/Work/private/looping-llama
 mkdir -p claude/agents claude/hooks
 mv claude/drafts/review-setup/agents/*.md claude/agents/
 mv claude/drafts/review-setup/hooks/pre-push-checks.sh claude/hooks/
@@ -33,7 +33,7 @@ chmod +x claude/hooks/pre-push-checks.sh
 
 ```fish
 for p in personal academic
-    ln -sfn ~/Work/agent-stack/claude/agents ~/.claude-$p/agents
+    ln -sfn ~/Work/private/looping-llama/claude/agents ~/.claude-$p/agents
 end
 ```
 
@@ -53,8 +53,8 @@ sandbox, ...). Running `link.sh` would overwrite them with the stale base
 (it makes a backup). So patch the live files directly, and the base too:
 
 ```fish
-set snip ~/Work/agent-stack/claude/drafts/review-setup/settings-snippet.json
-for f in ~/.claude-personal/settings.json ~/.claude-academic/settings.json ~/Work/agent-stack/claude/settings.base.json
+set snip ~/Work/private/looping-llama/claude/drafts/review-setup/settings-snippet.json
+for f in ~/.claude-personal/settings.json ~/.claude-academic/settings.json ~/Work/private/looping-llama/claude/settings.base.json
     cp $f $f.bak.(date +%Y%m%d%H%M%S)
     jq --indent 2 --slurpfile s $snip '.hooks.PreToolUse = ((.hooks.PreToolUse // []) + $s[0].hooks.PreToolUse)' $f > $f.tmp
     and mv $f.tmp $f
@@ -70,7 +70,7 @@ date with the live files, so that `link.sh` is safe to run again.
 ## 5. CLAUDE.md
 
 ```fish
-cd ~/Work/agent-stack/claude
+cd ~/Work/private/looping-llama/claude
 diff CLAUDE.md drafts/review-setup/CLAUDE.md.new
 mv drafts/review-setup/CLAUDE.md.new CLAUDE.md
 ```
@@ -81,7 +81,7 @@ Both profiles symlink `CLAUDE.md` to this file, so this updates both.
 
 ```fish
 # Hook passes non-push commands through (exit 0, no output)
-echo '{"tool_input":{"command":"git status"},"cwd":"'(pwd)'"}' | ~/Work/agent-stack/claude/hooks/pre-push-checks.sh; echo $status
+echo '{"tool_input":{"command":"git status"},"cwd":"'(pwd)'"}' | ~/Work/private/looping-llama/claude/hooks/pre-push-checks.sh; echo $status
 ```
 
 Then restart Claude Code (both profiles) and check:
@@ -92,7 +92,7 @@ Then restart Claude Code (both profiles) and check:
 ## 7. Commit agent-stack
 
 ```fish
-cd ~/Work/agent-stack
+cd ~/Work/private/looping-llama
 git add claude/agents claude/hooks claude/CLAUDE.md claude/settings.base.json link.sh
 git commit -m "feat: add pre-push review gate"
 ```
