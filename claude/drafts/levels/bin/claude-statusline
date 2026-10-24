@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Claude Code status line: shows the model, the directory and the usage of
+# the 5-hour and 7-day limits, and saves the status JSON so that Claude can
+# read its quota and pace its agents.
+#
+# Claude Code passes the session status as JSON on stdin. The script writes
+# it to $CLAUDE_STATUS_DIR/<session id>.json and latest.json (default
+# /tmp/claude-<uid>/statusline, readable from Claude's sandbox). Usage fields
+# are read from .rate_limits if present (see `raw.json` for what Claude Code
+# actually sends); missing fields are shown as "?".
+
+set -uo pipefail
+
+input=$(cat)
+dir=${CLAUDE_STATUS_DIR:-/tmp/claude-$(id -u)/statusline}
+mkdir -p "$dir" && chmod 700 "$dir"
+
+session=$(jq -r '.session_id // "unknown"' <<<"$input" 2>/dev/null) || session=unknown
+# Atomic writes, so a reader never sees a half-written file
+for name in "$session.json" latest.json; do
+    tmp=$(mktemp "$dir/.tmp.XXXXXX") || break
+    printf '%s\n' "$input" >"$tmp" && mv -f "$tmp" "$dir/$name"
+done
+# The first status ever received, kept to check which fields exist
+[[ -e $dir/raw.json ]] || printf '%s\n' "$input" >"$dir/raw.json"
+
+# Liveness lamp: a yellow dot that switches on and off with every refresh
+# (state per session, so parallel sessions don't flip each other's lamp).
+# With `statusLine.refreshInterval` set, it keeps blinking while Claude
+# Code runs, even when the session is idle.
+blink=$dir/.blink-$session
+if [[ -e $blink ]]; then
+    rm -f "$blink"
+    lamp=$'\e[38;5;240m○\e[0m'
+else
+    : >"$blink"
+    lamp=$'\e[38;5;226m●\e[0m'
+fi
+
+# Minutes since the last write to the session's transcript or to any of its
+# subagents' transcripts: shows whether work is still going on
+transcript=$(jq -r '.transcript_path // empty' <<<"$input" 2>/dev/null)
+last=
+if [[ -n $transcript && -e $transcript ]]; then
+    last=$(find "$transcript" "${transcript%.jsonl}" -name '*.jsonl' \
+        -printf '%T@\n' 2>/dev/null | sort -n | tail -n 1)
+fi
+
+# Usage per limit, with the time left until it resets (e.g., -1d2h38m,
+# -2h5m, -47m: leading zero units are left out)
+jq -r --argjson now "$(date +%s)" --arg lamp "$lamp" --arg last "$last" '
+  def left(t):
+    if t == null then ""
+    else ([t - $now, 0] | max | floor / 60 | floor) as $m
+      | [[($m / 1440 | floor), "d"], [($m % 1440 / 60 | floor), "h"], [($m % 60), "m"]]
+      | (map(.[0] > 0) | index(true) // 2) as $first
+      | " -" + (.[$first:] | map("\(.[0])\(.[1])") | join(""))
+    end;
+  # 256-color shades from green through yellow and orange to red
+  def color(p):
+    [[20, 34], [40, 70], [55, 148], [70, 220], [85, 208], [101, 196]]
+    | map(select(p < .[0])) | first[1] // 196;
+  def limit(name; l):
+    if l.used_percentage == null then "\(name) ?"
+    else (l.used_percentage | floor) as $p
+      | "\(name) \u001b[38;5;\(color($p))m\($p)%\u001b[0m\(left(l.resets_at))"
+    end;
+  # Time since the last activity: green under 5 min, yellow under 15, red
+  def active:
+    if $last == "" then empty
+    else (($now - ($last | tonumber)) / 60 | floor | [., 0] | max) as $m
+      | ([[5, 34], [15, 220]] | map(select($m < .[0])) | first[1] // 196) as $c
+      | "\u001b[38;5;\($c)m\($m)m ago\u001b[0m"
+    end;
+  $lamp + " " + ([
+    active,
+    (.model.display_name // "?"),
+    (.workspace.current_dir // .cwd // "" | split("/") | last),
+    limit("5h"; .rate_limits.five_hour // {}),
+    limit("7d"; .rate_limits.seven_day // {})
+  ] | join(" · "))
+' <<<"$input" 2>/dev/null || echo "$lamp status unavailable"

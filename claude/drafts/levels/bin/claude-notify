@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Send a push notification via ntfy: claude-notify "<message>"
+#
+# Without arguments, reads a Claude Code Notification hook event from stdin
+# and sends its `message`. The ntfy URL (and optional access token) come
+# from ~/.config/claude-notify/config, which Claude may not read:
+#
+#   NTFY_URL=https://ntfy.sh/<long random topic>
+#   NTFY_TOKEN=tk_...        (optional)
+#
+# Keep messages free of content (no repo names for client work, no code):
+# they pass through the ntfy server.
+
+set -uo pipefail
+
+config=$HOME/.config/claude-notify/config
+url="" token=""
+if [[ -r $config ]]; then
+    while IFS='=' read -r key value; do
+        case $key in
+            NTFY_URL) url=$value ;;
+            NTFY_TOKEN) token=$value ;;
+        esac
+    done <"$config"
+fi
+if [[ -z $url ]]; then
+    echo "claude-notify: NTFY_URL not set in $config" >&2
+    exit 1
+fi
+
+if [[ $# -gt 0 ]]; then
+    message=$*
+else
+    message=$(jq -r '.message // "Claude needs your attention"' 2>/dev/null)
+fi
+title="Claude (${CLAUDE_LEVEL:-supervised}, ${PERSONA:-${CLAUDE_CONFIG_DIR##*/.claude-}})"
+
+curl -fsS --max-time 10 -o /dev/null \
+    -H "Title: $title" \
+    ${token:+-H "Authorization: Bearer $token"} \
+    --data-binary "${message:0:200}" "$url"

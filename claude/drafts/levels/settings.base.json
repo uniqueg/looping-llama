@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "statusLine": {
+    "type": "command",
+    "command": "~/.local/bin/claude-statusline",
+    "refreshInterval": 5
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(git fetch *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --draft *)",
+      "Bash(gh repo fork *)",
+      "Bash(gh issue view *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)",
+      "Bash(gh pr checks *)",
+      "Bash(gh run list *)",
+      "Bash(gh run view *)",
+      "Bash(gh run watch *)",
+      "Bash(claude-notify *)"
+    ],
+    "ask": [
+      "Edit(~/Work/agent-stack/claude/CLAUDE.md)",
+      "Edit(~/Work/agent-stack/claude/agents/**)",
+      "Edit(~/Work/agent-stack/claude/hooks/**)",
+      "Edit(~/Work/agent-stack/claude/levels/**)",
+      "Edit(~/Work/agent-stack/claude/skills/**)",
+      "Edit(~/Work/agent-stack/claude/workflows/**)",
+      "Edit(~/Work/agent-stack/claude/settings.*.json)",
+      "Edit(~/Work/agent-stack/claude/bin/**)",
+      "Edit(~/Work/agent-stack/fish/**)",
+      "Edit(~/Work/agent-stack/direnv/**)",
+      "Edit(~/Work/agent-stack/link.sh)",
+      "Edit(~/Work/agent-stack/personas.map)",
+      "Edit(**/.envrc)",
+      "Write(~/Work/agent-stack/claude/CLAUDE.md)",
+      "Write(~/Work/agent-stack/claude/agents/**)",
+      "Write(~/Work/agent-stack/claude/hooks/**)",
+      "Write(~/Work/agent-stack/claude/levels/**)",
+      "Write(~/Work/agent-stack/claude/skills/**)",
+      "Write(~/Work/agent-stack/claude/workflows/**)",
+      "Write(~/Work/agent-stack/claude/settings.*.json)",
+      "Write(~/Work/agent-stack/claude/bin/**)",
+      "Write(~/Work/agent-stack/fish/**)",
+      "Write(~/Work/agent-stack/direnv/**)",
+      "Write(~/Work/agent-stack/link.sh)",
+      "Write(~/Work/agent-stack/personas.map)",
+      "Write(**/.envrc)"
+    ],
+    "deny": [
+      "Bash(gh api *merge*)",
+      "Bash(gh api *Merge*)",
+      "Bash(gh api *DELETE*)",
+      "Bash(gh api *delete*)",
+      "Bash(gh api *protection*)",
+      "Bash(gh api *rulesets*)",
+      "Bash(gh api *collaborators*)",
+      "Bash(gh api *secrets*)",
+      "Bash(gh api *hooks*)",
+      "Bash(gh api *environments*)",
+      "Bash(gh api *--input*)",
+      "Bash(gh api *=@/home/*)",
+      "Bash(gh api *=@/etc/*)",
+      "Bash(gh api *=@/root/*)",
+      "Bash(gh api *=@~*)",
+      "Bash(gh api *=@$*)",
+      "Bash(gh api *=@.*)",
+      "Bash(gh auth *)",
+      "Bash(gh release create *)",
+      "Bash(gh release delete *)",
+      "Bash(gh release delete-asset *)",
+      "Bash(gh release upload *)",
+      "Bash(gh repo delete *)",
+      "Bash(gh repo edit *)",
+      "Bash(gh secret *)",
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push * -f *)",
+      "Bash(git push * -f)",
+      "Bash(git push *+*)",
+      "Bash(git push --mirror*)",
+      "Bash(git push * --mirror*)",
+      "Edit(~/.local/state/claude-levels/**)",
+      "Write(~/.local/state/claude-levels/**)",
+      "Read(~/.config/claude-notify/**)",
+      "Read(~/.ssh/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.config/gh-*/**)",
+      "Read(**/.env)",
+      "Read(**/.env.*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true,
+    "excludedCommands": [
+      "git push *",
+      "git commit *",
+      "git fetch *",
+      "gh *",
+      "claude-notify *"
+    ],
+    "filesystem": {
+      "denyRead": [
+        "~/.config/claude-notify",
+        "~/.ssh",
+        "~/.gnupg",
+        "~/.config/gh",
+        "~/.config/gh-*",
+        "~/**/.env",
+        "~/**/.env.*"
+      ],
+      "allowWrite": [
+        "~/Work/agent-clones"
+      ],
+      "denyWrite": [
+        "~/.local/state/claude-levels",
+        "~/Work/agent-stack/claude/levels",
+        "~/Work/agent-stack/claude/bin",
+        "~/Work/agent-stack/fish",
+        "~/Work/agent-stack/direnv",
+        "~/Work/agent-stack/link.sh",
+        "~/Work/agent-stack/personas.map"
+      ]
+    }
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/Work/agent-stack/claude/bin/claude-notify",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/Work/agent-stack/claude/hooks/pre-push-checks.sh",
+            "timeout": 300
+          },
+          {
+            "type": "command",
+            "command": "$HOME/Work/agent-stack/claude/hooks/level-gate.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
