@@ -34,7 +34,10 @@ for ref in "$base_ref" origin/dev origin/main origin/master; do
 done
 base=$(git merge-base "$base_ref" HEAD 2>/dev/null) || exit 0
 
-mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD)
+# Rule tests contain findings on purpose, and semgrep scans files passed by
+# name even if .semgrepignore lists them
+mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$base" HEAD |
+    grep -vE '^\.semgrep/|(^|/)rule-tests/')
 [[ ${#files[@]} -eq 0 ]] && exit 0
 
 status=0
