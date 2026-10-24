@@ -10,7 +10,7 @@ Kept for later phases. Nothing here is referenced by `link.sh` or by the active 
 | OpenCode + `oc` + cross-review (Gemini API) | `opencode/`, `bin/oc`, `bin/cross-review` | The OpenCode section in `link.sh` (links `opencode.json`, `agents/`, and `claude/skills` into `~/.config/opencode/`). |
 | guard-outward hook (outward MCP actions) | `claude/hooks/guard-outward.py` | The `hooks.PreToolUse` block below. Only useful once an MCP server is configured. |
 | technical-writer skill, verify-citations, doc-export | `claude/skills/technical-writer/`, `bin/` | Move the skill back. Restore the helper-scripts section and the "Documents and citations" section of `claude/CLAUDE.md`. Needs pandoc/typst. |
-| Google Workspace MCP, LiteLLM, Nebius, Antigravity | (never configured) | See `../../agent-stack-response-v7.md` §2 step 6 and §3. |
+| Google Workspace MCP, LiteLLM, Nebius, Antigravity | (never configured) | No notes kept. |
 
 Settings fragments removed from `claude/settings.base.json`:
 

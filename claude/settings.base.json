@@ -1,27 +1,80 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "statusLine": {
+    "type": "command",
+    "command": "~/.local/bin/claude-statusline",
+    "refreshInterval": 5
+  },
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
+      "Bash(git fetch *)",
       "Bash(git push *)",
       "Bash(gh pr create --draft *)",
       "Bash(gh repo fork *)",
       "Bash(gh issue view *)",
       "Bash(gh pr view *)",
       "Bash(gh pr diff *)",
-      "Bash(gh pr checks *)"
+      "Bash(gh pr checks *)",
+      "Bash(gh run list *)",
+      "Bash(gh run view *)",
+      "Bash(gh run watch *)",
+      "Bash(claude-notify *)"
     ],
     "ask": [
-      "Bash(gh pr ready *)",
-      "Bash(gh pr edit *)",
-      "Bash(gh pr comment *)",
-      "Bash(gh pr review *)",
-      "Bash(gh issue comment *)",
-      "Bash(gh issue create *)",
-      "Bash(gh api *)"
+      "Edit(~/Work/private/looping-llama/claude/CLAUDE.md)",
+      "Edit(~/Work/private/looping-llama/claude/agents/**)",
+      "Edit(~/Work/private/looping-llama/claude/hooks/**)",
+      "Edit(~/Work/private/looping-llama/claude/levels/**)",
+      "Edit(~/Work/private/looping-llama/claude/skills/**)",
+      "Edit(~/Work/private/looping-llama/claude/workflows/**)",
+      "Edit(~/Work/private/looping-llama/claude/settings.*.json)",
+      "Edit(~/Work/private/looping-llama/claude/bin/**)",
+      "Edit(~/Work/private/looping-llama/fish/**)",
+      "Edit(~/Work/private/looping-llama/direnv/**)",
+      "Edit(~/Work/private/looping-llama/link.sh)",
+      "Edit(~/Work/private/looping-llama/personas.map)",
+      "Edit(**/.envrc)",
+      "Write(~/Work/private/looping-llama/claude/CLAUDE.md)",
+      "Write(~/Work/private/looping-llama/claude/agents/**)",
+      "Write(~/Work/private/looping-llama/claude/hooks/**)",
+      "Write(~/Work/private/looping-llama/claude/levels/**)",
+      "Write(~/Work/private/looping-llama/claude/skills/**)",
+      "Write(~/Work/private/looping-llama/claude/workflows/**)",
+      "Write(~/Work/private/looping-llama/claude/settings.*.json)",
+      "Write(~/Work/private/looping-llama/claude/bin/**)",
+      "Write(~/Work/private/looping-llama/fish/**)",
+      "Write(~/Work/private/looping-llama/direnv/**)",
+      "Write(~/Work/private/looping-llama/link.sh)",
+      "Write(~/Work/private/looping-llama/personas.map)",
+      "Write(**/.envrc)"
     ],
     "deny": [
-      "Bash(gh pr merge *)",
+      "Bash(gh api *merge*)",
+      "Bash(gh api *Merge*)",
+      "Bash(gh api *DELETE*)",
+      "Bash(gh api *delete*)",
+      "Bash(gh api *protection*)",
+      "Bash(gh api *rulesets*)",
+      "Bash(gh api *collaborators*)",
+      "Bash(gh api *secrets*)",
+      "Bash(gh api *hooks*)",
+      "Bash(gh api *environments*)",
+      "Bash(gh api *--input*)",
+      "Bash(gh api *=@/home/*)",
+      "Bash(gh api *=@/etc/*)",
+      "Bash(gh api *=@/root/*)",
+      "Bash(gh api *=@~*)",
+      "Bash(gh api *=@$*)",
+      "Bash(gh api *=@.*)",
+      "Bash(gh auth *)",
+      "Bash(gh release create *)",
+      "Bash(gh release delete *)",
+      "Bash(gh release delete-asset *)",
+      "Bash(gh release upload *)",
+      "Bash(gh repo delete *)",
+      "Bash(gh repo edit *)",
+      "Bash(gh secret *)",
       "Bash(git push --force*)",
       "Bash(git push * --force*)",
       "Bash(git push -f *)",
@@ -30,13 +83,13 @@
       "Bash(git push *+*)",
       "Bash(git push --mirror*)",
       "Bash(git push * --mirror*)",
-      "Bash(gh repo delete *)",
-      "Bash(gh release *)",
-      "Bash(gh auth *)",
+      "Edit(~/.local/state/claude-levels/**)",
+      "Write(~/.local/state/claude-levels/**)",
+      "Read(~/.config/claude-notify/**)",
       "Read(~/.ssh/**)",
       "Read(~/.gnupg/**)",
       "Read(~/.config/gh/**)",
-      "Read(~/.config/gh-academic/**)",
+      "Read(~/.config/gh-*/**)",
       "Read(**/.env)",
       "Read(**/.env.*)"
     ]
@@ -47,20 +100,48 @@
     "autoAllowBashIfSandboxed": true,
     "excludedCommands": [
       "git push *",
-      "gh *"
+      "git commit *",
+      "git fetch *",
+      "gh *",
+      "claude-notify *"
     ],
     "filesystem": {
       "denyRead": [
+        "~/.config/claude-notify",
         "~/.ssh",
         "~/.gnupg",
         "~/.config/gh",
-        "~/.config/gh-academic",
+        "~/.config/gh-*",
         "~/**/.env",
         "~/**/.env.*"
+      ],
+      "allowWrite": [
+        "~/Work/agent-clones"
+      ],
+      "denyWrite": [
+        "~/.local/state/claude-levels",
+        "~/Work/private/looping-llama/claude/levels",
+        "~/Work/private/looping-llama/claude/bin",
+        "~/Work/private/looping-llama/fish",
+        "~/Work/private/looping-llama/direnv",
+        "~/Work/private/looping-llama/link.sh",
+        "~/Work/private/looping-llama/personas.map"
       ]
     }
   },
   "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/Work/private/looping-llama/claude/bin/claude-notify",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -69,6 +150,11 @@
             "type": "command",
             "command": "$HOME/Work/private/looping-llama/claude/hooks/pre-push-checks.sh",
             "timeout": 300
+          },
+          {
+            "type": "command",
+            "command": "$HOME/Work/private/looping-llama/claude/hooks/level-gate.sh",
+            "timeout": 60
           }
         ]
       }

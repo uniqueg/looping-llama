@@ -23,14 +23,31 @@ for p in academic personal; do  # add personas here (work is parked in later/)
   cfg=$HOME/.claude-$p
   mkdir -p "$cfg"
   overlay=$AGENT_STACK/claude/settings.$p.json
-  rendered=$(python3 - "$AGENT_STACK" "$overlay" <<'PY'
+  # base + profile, merged like Claude Code merges settings sources: objects
+  # key by key, lists combined (no duplicates), other values from the
+  # profile. Top-level keys that neither sets (e.g. `theme`, written by
+  # /config) are kept from the current file.
+  rendered=$(python3 - "$AGENT_STACK" "$overlay" "$cfg/settings.json" <<'PY'
 import json, os, sys
-stack, overlay = sys.argv[1], sys.argv[2]
+stack, overlay, current = sys.argv[1:4]
+
+def merge(a, b):
+    if isinstance(a, dict) and isinstance(b, dict):
+        return {k: merge(a[k], b[k]) if k in a and k in b else b.get(k, a.get(k))
+                for k in {**a, **b}}
+    if isinstance(a, list) and isinstance(b, list):
+        return a + [x for x in b if x not in a]
+    return b
+
 with open(f"{stack}/claude/settings.base.json") as f:
     s = json.load(f)
 if os.path.exists(overlay):
     with open(overlay) as f:
-        s.update(json.load(f))
+        s = merge(s, json.load(f))
+if os.path.exists(current):
+    with open(current) as f:
+        own = json.load(f)
+    s.update({k: v for k, v in own.items() if k not in s})
 print(json.dumps(s, indent=2))
 PY
 )
@@ -43,9 +60,17 @@ PY
   fi
   link "$AGENT_STACK/claude/CLAUDE.md" "$cfg/CLAUDE.md"
   link "$AGENT_STACK/claude/skills" "$cfg/skills"
-  sed -i 's|^  link "$AGENT_STACK/claude/skills" "$cfg/skills"$|&\n  link "$AGENT_STACK/claude/agents" "$cfg/agents"|' link.sh
+  link "$AGENT_STACK/claude/agents" "$cfg/agents"
+  link "$AGENT_STACK/claude/workflows" "$cfg/workflows"
   mkdir -p "$HOME/.config/gh-$p" && chmod 700 "$HOME/.config/gh-$p"
 done
+
+echo "== Commands (fish functions, claude-notify, claude-statusline)"
+for f in "$AGENT_STACK"/fish/*.fish; do
+  link "$f" "$HOME/.config/fish/functions/$(basename "$f")"
+done
+link "$AGENT_STACK/claude/bin/claude-notify" "$HOME/.local/bin/claude-notify"
+link "$AGENT_STACK/claude/bin/claude-statusline" "$HOME/.local/bin/claude-statusline"
 
 echo "== Persona directories (direnv + git identity)"
 while read -r dir persona; do

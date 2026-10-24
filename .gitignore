@@ -64,3 +64,6 @@ zsdoc/data
 
 # Project-specific notes
 claude/work/
+
+# Skills synced from claude.ai (not maintained here)
+claude/skills/synced/

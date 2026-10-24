@@ -1,3 +1,0 @@
-#!/bin/sh
-echo "agent-stack: no agent in this directory (PERSONA=${PERSONA:-none}; see agent-stack/personas.map)." >&2
-exit 1
