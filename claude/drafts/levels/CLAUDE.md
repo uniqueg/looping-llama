@@ -4,7 +4,7 @@ These apply to every project and persona. Project `CLAUDE.md`/`AGENTS.md` files 
 
 ## Autonomy level
 
-Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `external`, …; see `~/Work/agent-stack/claude/levels/README.md`). Its rules are appended to the system prompt and override these rules where they differ. Without a level, follow `supervised`. Discussing a possible change of level or policy is not an instruction: keep the current rules, and leave running agents alone, until I clearly say to apply the change.
+Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `external`, …; see `~/Work/private/looping-llama/claude/levels/README.md`). Its rules are appended to the system prompt and override these rules where they differ. Without a level, follow `supervised`. Discussing a possible change of level or policy is not an instruction: keep the current rules, and leave running agents alone, until I clearly say to apply the change.
 
 ## Hard rules
 
@@ -33,7 +33,7 @@ Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `exter
 - Before raising open points, check them against the project's decision records (plan, memory) and drop what's already decided.
 - When I commit your changes (e.g. in agent-stack), give me the exact git commands, or at least the commit message.
 - Follow ecosystem conventions exactly (e.g. Helm's camelCase values keys). In frameworks, prefer options for apps over hard-coded behaviour, and fix framework gaps before a release over an issue plus a patch release.
-- Project and session documents (plans, handovers, drafts for other people) go into `~/Work/agent-stack/claude/work/<project>/` (git-ignored); `~/Work/agent-stack/claude/drafts/` holds drafts of the agent setup only.
+- Project and session documents (plans, handovers, drafts for other people) go into `~/Work/private/looping-llama/claude/work/<project>/` (git-ignored); `~/Work/private/looping-llama/claude/drafts/` holds drafts of the agent setup only.
 
 ## Python
 

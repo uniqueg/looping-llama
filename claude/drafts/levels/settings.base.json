@@ -22,31 +22,31 @@
       "Bash(claude-notify *)"
     ],
     "ask": [
-      "Edit(~/Work/agent-stack/claude/CLAUDE.md)",
-      "Edit(~/Work/agent-stack/claude/agents/**)",
-      "Edit(~/Work/agent-stack/claude/hooks/**)",
-      "Edit(~/Work/agent-stack/claude/levels/**)",
-      "Edit(~/Work/agent-stack/claude/skills/**)",
-      "Edit(~/Work/agent-stack/claude/workflows/**)",
-      "Edit(~/Work/agent-stack/claude/settings.*.json)",
-      "Edit(~/Work/agent-stack/claude/bin/**)",
-      "Edit(~/Work/agent-stack/fish/**)",
-      "Edit(~/Work/agent-stack/direnv/**)",
-      "Edit(~/Work/agent-stack/link.sh)",
-      "Edit(~/Work/agent-stack/personas.map)",
+      "Edit(~/Work/private/looping-llama/claude/CLAUDE.md)",
+      "Edit(~/Work/private/looping-llama/claude/agents/**)",
+      "Edit(~/Work/private/looping-llama/claude/hooks/**)",
+      "Edit(~/Work/private/looping-llama/claude/levels/**)",
+      "Edit(~/Work/private/looping-llama/claude/skills/**)",
+      "Edit(~/Work/private/looping-llama/claude/workflows/**)",
+      "Edit(~/Work/private/looping-llama/claude/settings.*.json)",
+      "Edit(~/Work/private/looping-llama/claude/bin/**)",
+      "Edit(~/Work/private/looping-llama/fish/**)",
+      "Edit(~/Work/private/looping-llama/direnv/**)",
+      "Edit(~/Work/private/looping-llama/link.sh)",
+      "Edit(~/Work/private/looping-llama/personas.map)",
       "Edit(**/.envrc)",
-      "Write(~/Work/agent-stack/claude/CLAUDE.md)",
-      "Write(~/Work/agent-stack/claude/agents/**)",
-      "Write(~/Work/agent-stack/claude/hooks/**)",
-      "Write(~/Work/agent-stack/claude/levels/**)",
-      "Write(~/Work/agent-stack/claude/skills/**)",
-      "Write(~/Work/agent-stack/claude/workflows/**)",
-      "Write(~/Work/agent-stack/claude/settings.*.json)",
-      "Write(~/Work/agent-stack/claude/bin/**)",
-      "Write(~/Work/agent-stack/fish/**)",
-      "Write(~/Work/agent-stack/direnv/**)",
-      "Write(~/Work/agent-stack/link.sh)",
-      "Write(~/Work/agent-stack/personas.map)",
+      "Write(~/Work/private/looping-llama/claude/CLAUDE.md)",
+      "Write(~/Work/private/looping-llama/claude/agents/**)",
+      "Write(~/Work/private/looping-llama/claude/hooks/**)",
+      "Write(~/Work/private/looping-llama/claude/levels/**)",
+      "Write(~/Work/private/looping-llama/claude/skills/**)",
+      "Write(~/Work/private/looping-llama/claude/workflows/**)",
+      "Write(~/Work/private/looping-llama/claude/settings.*.json)",
+      "Write(~/Work/private/looping-llama/claude/bin/**)",
+      "Write(~/Work/private/looping-llama/fish/**)",
+      "Write(~/Work/private/looping-llama/direnv/**)",
+      "Write(~/Work/private/looping-llama/link.sh)",
+      "Write(~/Work/private/looping-llama/personas.map)",
       "Write(**/.envrc)"
     ],
     "deny": [
@@ -120,12 +120,12 @@
       ],
       "denyWrite": [
         "~/.local/state/claude-levels",
-        "~/Work/agent-stack/claude/levels",
-        "~/Work/agent-stack/claude/bin",
-        "~/Work/agent-stack/fish",
-        "~/Work/agent-stack/direnv",
-        "~/Work/agent-stack/link.sh",
-        "~/Work/agent-stack/personas.map"
+        "~/Work/private/looping-llama/claude/levels",
+        "~/Work/private/looping-llama/claude/bin",
+        "~/Work/private/looping-llama/fish",
+        "~/Work/private/looping-llama/direnv",
+        "~/Work/private/looping-llama/link.sh",
+        "~/Work/private/looping-llama/personas.map"
       ]
     }
   },
@@ -136,7 +136,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/Work/agent-stack/claude/bin/claude-notify",
+            "command": "$HOME/Work/private/looping-llama/claude/bin/claude-notify",
             "timeout": 15
           }
         ]
@@ -148,12 +148,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/Work/agent-stack/claude/hooks/pre-push-checks.sh",
+            "command": "$HOME/Work/private/looping-llama/claude/hooks/pre-push-checks.sh",
             "timeout": 300
           },
           {
             "type": "command",
-            "command": "$HOME/Work/agent-stack/claude/hooks/level-gate.sh",
+            "command": "$HOME/Work/private/looping-llama/claude/hooks/level-gate.sh",
             "timeout": 60
           }
         ]

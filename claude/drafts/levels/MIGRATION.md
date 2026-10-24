@@ -4,12 +4,12 @@ Run this in a normal terminal (not inside Claude), when no Claude session is
 working (running sessions reload the base settings immediately):
 
 ```sh
-bash ~/Work/agent-stack/claude/drafts/levels/install.sh
+bash ~/Work/private/looping-llama/claude/drafts/levels/install.sh
 ```
 
 It asks once to confirm, and for your ntfy URL (and optional token) if
 `~/.config/claude-notify/config` doesn't exist yet. Everything it replaces
-goes to `~/.local/state/agent-stack/install-<timestamp>/` first. It:
+goes to `~/.local/state/looping-llama/install-<timestamp>/` first. It:
 
 1. Installs into agent-stack: `claude/levels/` (with this README),
    `claude/hooks/level-gate.sh`, `claude/bin/claude-notify`, `fish/claude.fish`

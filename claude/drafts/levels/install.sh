@@ -4,16 +4,16 @@
 # normal terminal (not inside Claude), when no Claude session is working:
 # running sessions reload the new base settings immediately.
 #
-#   bash ~/Work/agent-stack/claude/drafts/levels/install.sh
+#   bash ~/Work/private/looping-llama/claude/drafts/levels/install.sh
 #
-# Everything it replaces is copied to ~/.local/state/agent-stack/install-<timestamp>/
+# Everything it replaces is copied to ~/.local/state/looping-llama/install-<timestamp>/
 # first. It is safe to run again.
 set -euo pipefail
 
-STACK=$HOME/Work/agent-stack
+STACK=$HOME/Work/private/looping-llama
 SRC=$STACK/claude/drafts/levels
 TS=$(date +%Y%m%d%H%M%S)
-BACKUP=$HOME/.local/state/agent-stack/install-$TS
+BACKUP=$HOME/.local/state/looping-llama/install-$TS
 FOCA_LOCAL=$HOME/Work/elixir/foca/CLAUDE.local.md
 
 step() { printf '\n== %s\n' "$*"; }
@@ -144,7 +144,7 @@ cat <<EOF
        claude-a -w fix-123           (default: supervised)
   2. For forks, add 'export CLAUDE_LEVEL=external' to the directory's .envrc.
   3. Commit agent-stack:
-       cd ~/Work/agent-stack
+       cd ~/Work/private/looping-llama
        rm -r claude/drafts/levels
        git rm -r -q --cached claude/skills/synced
        git add -A

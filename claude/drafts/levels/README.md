@@ -111,7 +111,7 @@ Set `CLAUDE_LEVEL` in a directory's `.envrc` (direnv), e.g. for forks:
 
 ```sh
 # ~/Work/forks/.envrc
-source_env ~/Work/agent-stack/direnv/personal.envrc
+source_env ~/Work/private/looping-llama/direnv/personal.envrc
 export CLAUDE_LEVEL=external
 ```
 

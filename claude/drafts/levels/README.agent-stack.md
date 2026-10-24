@@ -160,7 +160,7 @@ claude -w fix-123                    # in a mapped directory: its profile; its l
 For forks, set a default level in the directory's `.envrc`:
 
 ```sh
-source_env ~/Work/agent-stack/direnv/personal.envrc
+source_env ~/Work/private/looping-llama/direnv/personal.envrc
 export CLAUDE_LEVEL=external
 ```
 
@@ -231,7 +231,7 @@ Skills and workflows:
 |---|---|---|
 | 1 | **Tools.** Claude Code, fish, direnv, git, gh, jq, python3, curl, bubblewrap and socat (sandbox). For the pre-push hook: `mise use -g semgrep ast-grep` (`/usr/bin/sg` is not ast-grep). | `claude --version`, `semgrep --version`, `ast-grep --version` work. |
 | 2 | **Sandbox (AppArmor).** `sudo cp sandbox/apparmor-bwrap /etc/apparmor.d/bwrap && sudo systemctl reload apparmor`, then `bwrap --ro-bind / / --dev /dev --proc /proc --unshare-net true; echo $?` | `0` and nothing else. Without the fix: `setting up uid map: Permission denied` or `loopback: Failed RTM_NEWADDR`. |
-| 3 | **Repo.** Clone to `~/Work/agent-stack` **before** step 5: `link.sh` writes absolute paths, and settings and the `claude` function expect this path. | |
+| 3 | **Repo.** Clone to `~/Work/private/looping-llama` **before** step 5: `link.sh` writes absolute paths, and settings and the `claude` function expect this path. | |
 | 4 | **SSH key.** All personas use `~/.ssh/id_ed25519_github`: `ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes -T git@github.com` | `Hi <login>! You've successfully authenticated…` |
 | 5 | **Link.** `./link.sh`, then again. `git config --global --get-regexp includeIf` | Run 1: `wrote …settings.json` per profile, the symlinks, `.envrc` files and `git: … identity` lines. Run 2: `up to date`, nothing new. One `includeIf` per mapped directory. |
 | 6 | **fish and direnv.** In `~/.config/fish/config.fish` (interactive block): `direnv hook fish \| source` and the `claude-a`/`claude-p` wrappers (see above). Then `direnv allow` in each mapped directory. | In `~/Work/elixir`: `direnv: export +CLAUDE_CONFIG_DIR +GH_CONFIG_DIR +PERSONA`. `functions -q claude claude-approve` succeeds. |
@@ -246,7 +246,7 @@ Skills and workflows:
 On the existing machine, the levels were installed from drafts with
 `claude/drafts/levels/install.sh` (run once, in a normal terminal, with no
 Claude session working). It backed up everything it replaced to
-`~/.local/state/agent-stack/install-<timestamp>/`, installed `claude/levels/`,
+`~/.local/state/looping-llama/install-<timestamp>/`, installed `claude/levels/`,
 the new hook, `claude-notify`, the fish functions, `CLAUDE.md`,
 `settings.base.json`, `link.sh`, the updated `implement-issue` skill and this
 README, removed applied drafts and the `claude-merge`
