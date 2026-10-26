@@ -33,6 +33,9 @@ Concrete ways the changed code fails or can be abused:
   anonymous) user can make grow without limit (stored records, list
   responses, query or filter size, per-request work) and what that costs
   other users' requests once it holds thousands of entries.
+- Secrets in artefacts: build contexts, Dockerfiles, `.dockerignore`,
+  packaging manifests and client bundles that can carry secrets into
+  images, packages or browsers.
 - Contract violations: behavior that disagrees with the OpenAPI spec,
   docs, docstrings, config schema or the stated intent of the commit.
 - Compatibility: breaking changes for existing data, configs, clients or
