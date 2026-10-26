@@ -59,6 +59,7 @@ Names are short, expressive and the same in every repo. Required status checks m
 - Use background agents to avoid idle time while reviews or CI run, but never let two agents work on things that can foreseeably conflict (same files, same branch, merges in a stack).
 - Write decided details into an agent's prompt by copying them from the decision records (plan, memory), not from recall.
 - Agents get their merge rights from the session's level; don't hand them broader ones.
+- Shared local services (e.g. a dev backend that several agents or the user test against) stay as they are. An agent that needs another version, mode or data runs its own instance on its own port and removes it afterwards.
 
 ## Issues and PRs
 
@@ -66,7 +67,8 @@ Names are short, expressive and the same in every repo. Required status checks m
 - A PR never addresses only part of an issue. If an issue is too big for one clean, small or moderate PR, split it first (see below).
 - Issues are semantic and bite-sized: each one can be addressed in one clean, small or moderate PR. If that's not possible, create child issues and a parent issue that lists them (task list). If an issue by someone else (not me or you) is too big, create child issues yourself and link them to the original issue. The PR that closes the last open child also closes the parent.
 - Give every issue you create the matching labels from those the repo already has (`gh label list --repo <owner>/<repo>`); don't create new labels. If the repo has label groups such as `type:`, `priority:`, `workload:` and `status:`, pick the best value from each group (`status:` only for open issues; update it when the status changes, e.g. `status: in progress` when work starts).
-- If an issue depends on other issues, record that with GitHub's issue dependencies ("blocked by", REST: `POST /repos/<owner>/<repo>/issues/<n>/dependencies/blocked_by` with the blocking issue's `id`), not only in the text, and set `status: blocked` while a blocker is open.
+- If an issue depends on other issues, record that with GitHub's issue dependencies ("blocked by", REST: `POST /repos/<owner>/<repo>/issues/<n>/dependencies/blocked_by` with the blocking issue's `id`; for new issues, `gh issue create --blocked-by <n|URL>` and `--parent <n|URL>`, also across repos), not only in the text, and set `status: blocked` while a blocker is open.
+- When a release is planned, give every issue it should contain the milestone `v<version>` (create the milestone if it's missing), including sub-issues and issues added later. Move issues that slip to the next milestone, and check before the release that the milestone has no open issues left.
 - Keep the number of issues small without breaking the semantic rule: group related problems into one issue as long as it stays PR-sized. Small, low-stakes problems may go into one "mixed bag" issue if they're not too far apart in topic.
 
 ## Release notes

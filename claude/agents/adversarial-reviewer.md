@@ -29,6 +29,10 @@ Concrete ways the changed code fails or can be abused:
 - Security: authentication or authorization bypass, injection (queries,
   shell, templates, YAML), secrets in logs or errors, SSRF, unsafe
   deserialization, trusting client input, overly broad permissions.
+- Resource exhaustion at scale: anything an ordinary (authenticated or
+  anonymous) user can make grow without limit (stored records, list
+  responses, query or filter size, per-request work) and what that costs
+  other users' requests once it holds thousands of entries.
 - Contract violations: behavior that disagrees with the OpenAPI spec,
   docs, docstrings, config schema or the stated intent of the commit.
 - Compatibility: breaking changes for existing data, configs, clients or
