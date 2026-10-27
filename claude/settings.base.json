@@ -101,6 +101,8 @@
     "excludedCommands": [
       "git push *",
       "git commit *",
+      "git rebase *",
+      "git cherry-pick *",
       "git fetch *",
       "gh *",
       "claude-notify *"

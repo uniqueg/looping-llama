@@ -63,6 +63,9 @@ PY
   link "$AGENT_STACK/claude/agents" "$cfg/agents"
   link "$AGENT_STACK/claude/workflows" "$cfg/workflows"
   mkdir -p "$HOME/.config/gh-$p" && chmod 700 "$HOME/.config/gh-$p"
+  if ! GH_CONFIG_DIR=$HOME/.config/gh-$p gh auth status >/dev/null 2>&1; then
+    echo "  gh: no login for $p - run (Fish): env GH_CONFIG_DIR=$HOME/.config/gh-$p gh auth login"
+  fi
 done
 
 echo "== Commands (fish functions, claude-notify, claude-statusline)"
@@ -71,6 +74,14 @@ for f in "$AGENT_STACK"/fish/*.fish; do
 done
 link "$AGENT_STACK/claude/bin/claude-notify" "$HOME/.local/bin/claude-notify"
 link "$AGENT_STACK/claude/bin/claude-statusline" "$HOME/.local/bin/claude-statusline"
+
+echo "== mise (global tools, incl. semgrep/ast-grep for the push hook)"
+link "$AGENT_STACK/mise/config.toml" "$HOME/.config/mise/config.toml"
+for tool in semgrep ast-grep; do
+  if ! "$tool" --version >/dev/null 2>&1; then
+    echo "  WARNING: $tool doesn't run - run 'mise install' (the push hook needs it)"
+  fi
+done
 
 echo "== Persona directories (direnv + git identity)"
 while read -r dir persona; do

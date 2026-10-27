@@ -1,0 +1,25 @@
+[tools]
+# Core runtimes
+python = "3.12"
+node = "22"
+uv = "latest"
+
+# Verified release binaries
+"github:casey/just" = "latest"
+"github:sigstore/cosign" = "latest"
+"github:mikefarah/yq" = "latest"
+jq = "latest"
+eza = "latest"
+zoxide = "latest"
+fd = "latest"
+ripgrep = "latest"
+bat = "latest"
+fzf = "latest"
+# Needed by the pre-push hook (claude/hooks/pre-push-checks.sh)
+semgrep = "1.181.0"
+ast-grep = "0.51.0"
+
+[settings]
+experimental = true
+legacy_version_file = false
+idiomatic_version_file = false
