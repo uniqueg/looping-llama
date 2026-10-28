@@ -6,7 +6,11 @@ the global CLAUDE.md where they differ.
 
 - No human review is needed before a merge. Once CI passes, automated
   reviewers (Sourcery, Copilot) have reviewed and no threads are open, you
-  may squash-merge your own PRs into non-default branches.
+  may squash-merge your own PRs, also into the default branch, but only in
+  repos where the user is an admin, directly or as an org admin (check
+  `gh api repos/<owner>/<repo> --jq .permissions.admin`); elsewhere, stop
+  at "ready to merge". Review gates of a repo (e.g. a code owner's
+  approval) still apply.
 - You may open issues and post comments, replies and reviews in the
   user's name when the task calls for it. List everything you posted in
   your report.

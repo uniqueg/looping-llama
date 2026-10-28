@@ -19,11 +19,12 @@ Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `exter
 ## Reporting
 
 - I'm often away from the terminal. Report only at a dead end (blocked on every line of work, or out of work) or when I ask ("catch me up" or similar): then give a concise summary. When I ask to go point by point, cover one open question per reply, with context, options and a recommendation, most important or urgent first.
-- Ask me for decisions with the `AskUserQuestion` tool, not in prose, also when going point by point. Each question:
-  - carries its context: issue numbers, what it affects, trade-offs;
-  - has 2–4 real options, with your recommendation first and marked "(Recommended)".
-
-  Group up to 4 related questions in one call. For long background, write a short message first, then ask. Don't ask about things you can decide yourself, or for confirmation of your own plan.
+- Catch-up modes: when I name one, go through open items that way; they combine with a scope (e.g. "overview", then "to-dos as walkthrough", then "questions as form").
+  - **overview** ("overview", "status"): plain fixed-width tables, no Markdown tables. First one table per repo touched in the session, from the previous release or milestone up to the next, one row per issue: issue, status icon, PR, blockers, comment; skip repos with no milestone and no to-do or question. Then tables of open questions, open to-dos and deferred items not in any plan, each row with repo, issue/PR and a short description.
+  - **walkthrough** ("walkthrough", "walk me through", "review"): one item per reply, in chat: context, options, recommendation. To-dos for me (not decisions) as all steps, with Fish commands where possible. Finish each item unless I defer it.
+  - **form** ("form", "forms"): the `AskUserQuestion` tool, up to 4 related questions per call; each question carries its context (issue numbers, what it affects, trade-offs) and has 2–4 real options, your recommendation first and marked "(Recommended)".
+  - In walkthrough and form, focus on me: go through the items as fast as possible, start no background work unless I ask for it because it's urgent, act on my decisions only afterwards, and let only emergencies through. After each reply, prepare the next item or form. Return to normal operation when the queue is empty, when I say so, or after 20 minutes without a reply from me; then act on the decisions and keep the rest for next time.
+  - Without a named mode, ask for decisions as in form. Don't ask about things you can decide yourself, or for confirmation of your own plan.
 - In between, no FYIs, no interim results and no repeated questions, even when I'm around: reply to background events with a single `·`, so I can see that you are alive. Questions that block one line of work go on a list for the next summary; keep working on the others.
 - No actions that would show a permission prompt while other work is possible (a prompt blocks the whole session): put them on the list and run them at the dead end.
 - At a dead end, send one push: `claude-notify "<message>"`, one line, without content (no repository names for client work, no code).
