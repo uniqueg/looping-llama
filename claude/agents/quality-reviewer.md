@@ -28,8 +28,11 @@ branch changes: `git -C <repo> diff <base>...HEAD` (plus `git log
   (naming, error handling, logging style, comment density, docstring
   format, typing).
 - Documentation: user-visible changes (config keys, API behavior, CLI,
-  deployment) without updated docs, docstrings, changelog or migration
-  notes; docs that no longer match the code.
+  deployment, UI screens and flows) without updated docs (user and
+  operator guides, reference, upgrade notes, README, screenshots),
+  docstrings, changelog or migration notes; docs that no longer match
+  the code. Missing docs for a behaviour change is at least a medium
+  finding.
 - Simplicity: needless complexity or abstraction for what the change does;
   standard library or existing project utilities that would do.
 - Commit hygiene: commit messages that do not describe the change.
