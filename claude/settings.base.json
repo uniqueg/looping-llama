@@ -19,34 +19,36 @@
       "Bash(gh run list *)",
       "Bash(gh run view *)",
       "Bash(gh run watch *)",
-      "Bash(claude-notify *)"
+      "Bash(claude-notify *)",
+      "Read(~/Work/shared/**)",
+      "Edit(~/Work/shared/**)"
     ],
     "ask": [
-      "Edit(~/Work/private/looping-llama/claude/CLAUDE.md)",
-      "Edit(~/Work/private/looping-llama/claude/agents/**)",
-      "Edit(~/Work/private/looping-llama/claude/hooks/**)",
-      "Edit(~/Work/private/looping-llama/claude/levels/**)",
-      "Edit(~/Work/private/looping-llama/claude/skills/**)",
-      "Edit(~/Work/private/looping-llama/claude/workflows/**)",
-      "Edit(~/Work/private/looping-llama/claude/settings.*.json)",
-      "Edit(~/Work/private/looping-llama/claude/bin/**)",
-      "Edit(~/Work/private/looping-llama/fish/**)",
-      "Edit(~/Work/private/looping-llama/direnv/**)",
-      "Edit(~/Work/private/looping-llama/link.sh)",
-      "Edit(~/Work/private/looping-llama/personas.map)",
+      "Edit(~/Work/shared/looping-llama/claude/CLAUDE.md)",
+      "Edit(~/Work/shared/looping-llama/claude/agents/**)",
+      "Edit(~/Work/shared/looping-llama/claude/hooks/**)",
+      "Edit(~/Work/shared/looping-llama/claude/levels/**)",
+      "Edit(~/Work/shared/looping-llama/claude/skills/**)",
+      "Edit(~/Work/shared/looping-llama/claude/workflows/**)",
+      "Edit(~/Work/shared/looping-llama/claude/settings.*.json)",
+      "Edit(~/Work/shared/looping-llama/claude/bin/**)",
+      "Edit(~/Work/shared/looping-llama/fish/**)",
+      "Edit(~/Work/shared/looping-llama/direnv/**)",
+      "Edit(~/Work/shared/looping-llama/link.sh)",
+      "Edit(~/Work/shared/looping-llama/personas.map)",
       "Edit(**/.envrc)",
-      "Write(~/Work/private/looping-llama/claude/CLAUDE.md)",
-      "Write(~/Work/private/looping-llama/claude/agents/**)",
-      "Write(~/Work/private/looping-llama/claude/hooks/**)",
-      "Write(~/Work/private/looping-llama/claude/levels/**)",
-      "Write(~/Work/private/looping-llama/claude/skills/**)",
-      "Write(~/Work/private/looping-llama/claude/workflows/**)",
-      "Write(~/Work/private/looping-llama/claude/settings.*.json)",
-      "Write(~/Work/private/looping-llama/claude/bin/**)",
-      "Write(~/Work/private/looping-llama/fish/**)",
-      "Write(~/Work/private/looping-llama/direnv/**)",
-      "Write(~/Work/private/looping-llama/link.sh)",
-      "Write(~/Work/private/looping-llama/personas.map)",
+      "Write(~/Work/shared/looping-llama/claude/CLAUDE.md)",
+      "Write(~/Work/shared/looping-llama/claude/agents/**)",
+      "Write(~/Work/shared/looping-llama/claude/hooks/**)",
+      "Write(~/Work/shared/looping-llama/claude/levels/**)",
+      "Write(~/Work/shared/looping-llama/claude/skills/**)",
+      "Write(~/Work/shared/looping-llama/claude/workflows/**)",
+      "Write(~/Work/shared/looping-llama/claude/settings.*.json)",
+      "Write(~/Work/shared/looping-llama/claude/bin/**)",
+      "Write(~/Work/shared/looping-llama/fish/**)",
+      "Write(~/Work/shared/looping-llama/direnv/**)",
+      "Write(~/Work/shared/looping-llama/link.sh)",
+      "Write(~/Work/shared/looping-llama/personas.map)",
       "Write(**/.envrc)"
     ],
     "deny": [
@@ -118,16 +120,28 @@
         "~/**/.env.*"
       ],
       "allowWrite": [
-        "~/Work/agent-clones"
+        "~/Work/agent-clones",
+        "~/Work/shared"
       ],
       "denyWrite": [
         "~/.local/state/claude-levels",
-        "~/Work/private/looping-llama/claude/levels",
-        "~/Work/private/looping-llama/claude/bin",
-        "~/Work/private/looping-llama/fish",
-        "~/Work/private/looping-llama/direnv",
-        "~/Work/private/looping-llama/link.sh",
-        "~/Work/private/looping-llama/personas.map"
+        "~/Work/shared/looping-llama/.git",
+        "~/Work/shared/looping-llama/claude/CLAUDE.md",
+        "~/Work/shared/looping-llama/claude/agents",
+        "~/Work/shared/looping-llama/claude/hooks",
+        "~/Work/shared/looping-llama/claude/skills",
+        "~/Work/shared/looping-llama/claude/workflows",
+        "~/Work/shared/looping-llama/claude/settings.base.json",
+        "~/Work/shared/looping-llama/claude/settings.academic.json",
+        "~/Work/shared/looping-llama/claude/settings.personal.json",
+        "~/Work/shared/looping-llama/claude/levels",
+        "~/Work/shared/looping-llama/claude/bin",
+        "~/Work/shared/looping-llama/fish",
+        "~/Work/shared/looping-llama/direnv",
+        "~/Work/shared/looping-llama/git",
+        "~/Work/shared/looping-llama/mise",
+        "~/Work/shared/looping-llama/link.sh",
+        "~/Work/shared/looping-llama/personas.map"
       ]
     }
   },
@@ -138,7 +152,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/Work/private/looping-llama/claude/bin/claude-notify",
+            "command": "$HOME/Work/shared/looping-llama/claude/bin/claude-notify",
             "timeout": 15
           }
         ]
@@ -150,16 +164,21 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/Work/private/looping-llama/claude/hooks/pre-push-checks.sh",
+            "command": "$HOME/Work/shared/looping-llama/claude/hooks/pre-push-checks.sh",
             "timeout": 300
           },
           {
             "type": "command",
-            "command": "$HOME/Work/private/looping-llama/claude/hooks/level-gate.sh",
+            "command": "$HOME/Work/shared/looping-llama/claude/hooks/level-gate.sh",
             "timeout": 60
           }
         ]
       }
     ]
-  }
+  },
+  "env": {
+    "CLAUDE_CODE_SCROLL_SPEED": "6"
+  },
+  "skipWorkflowUsageWarning": true,
+  "model": "opus"
 }

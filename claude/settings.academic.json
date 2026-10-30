@@ -1,10 +1,14 @@
 {
   "permissions": {
-    "deny": [ "Read(~/Work/private/**)" ]
+    "deny": [
+      "Read(~/Work/private/**)"
+    ]
   },
   "sandbox": {
     "filesystem": {
-      "denyRead": [ "~/Work/private" ]
+      "denyRead": [
+        "~/Work/private"
+      ]
     }
   }
 }

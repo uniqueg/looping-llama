@@ -1,5 +1,5 @@
 function claude --description 'Claude Code with an autonomy level: claude [--level <name>] [args]'
-    set -l levels_dir ~/Work/private/looping-llama/claude/levels
+    set -l levels_dir ~/Work/shared/looping-llama/claude/levels
     set -q CLAUDE_LEVELS_DIR; and set levels_dir $CLAUDE_LEVELS_DIR
     set -f level $CLAUDE_LEVEL
     set -f source env

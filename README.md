@@ -79,9 +79,20 @@ git identity and a gh login, per directory tree.
 | Persona / profile | Claude config | Account | gh config | git identity | Directories (`personas.map`) |
 |---|---|---|---|---|---|
 | `academic` | `~/.claude-academic` | Team seat | `~/.config/gh-academic` | `git/academic.gitconfig` | `~/Work/biozentrum`, `~/Work/elixir`, `~/Work/ga4gh` |
-| `personal` | `~/.claude-personal` | personal account | `~/.config/gh-personal` | `git/personal.gitconfig` | `~/Work/private` |
+| `personal` | `~/.claude-personal` | personal account | `~/.config/gh-personal` | `git/personal.gitconfig` | `~/Work/private`, `~/Work/shared` |
 | `none` | – | – | – | – | none mapped at the moment; `claude` is blocked there |
 | (default) | `~/.claude` | whichever is logged in | `~/.config/gh` | global `~/.gitconfig` | everything else, e.g. `~/Work/misc`, `~/Work/sandbox` |
+
+`~/Work/shared` holds what every profile needs, starting with this repo
+(`~/Work/shared/looping-llama`: rules, settings sources, the agents' `claude/work`
+and `claude/drafts`). Every profile may read and write there
+(`settings.base.json`: `Read`/`Edit` allowed, sandbox `allowWrite`), except
+the agent-stack config itself (CLAUDE.md, agents, hooks, skills, workflows,
+settings sources, levels, bin, fish, direnv, git, mise, link.sh,
+personas.map, `.git`), which stays write-protected (`ask` rules, sandbox
+`denyWrite`). `~/Work/private` is for personal work only; the academic
+profile can't read it. Plain `claude` in `~/Work/shared` uses the personal
+profile; use `claude-a` there for the academic one.
 
 There are two ways to pick a profile:
 
@@ -160,7 +171,7 @@ claude -w fix-123                    # in a mapped directory: its profile; its l
 For forks, set a default level in the directory's `.envrc`:
 
 ```sh
-source_env ~/Work/private/looping-llama/direnv/personal.envrc
+source_env ~/Work/shared/looping-llama/direnv/personal.envrc
 export CLAUDE_LEVEL=external
 ```
 
@@ -231,7 +242,7 @@ Skills and workflows:
 |---|---|---|
 | 1 | **Tools.** Claude Code, fish, direnv, git, gh, jq, python3, curl, bubblewrap and socat (sandbox). For the pre-push hook: `mise use -g semgrep ast-grep` (`/usr/bin/sg` is not ast-grep). | `claude --version`, `semgrep --version`, `ast-grep --version` work. |
 | 2 | **Sandbox (AppArmor).** `sudo cp sandbox/apparmor-bwrap /etc/apparmor.d/bwrap && sudo systemctl reload apparmor`, then `bwrap --ro-bind / / --dev /dev --proc /proc --unshare-net true; echo $?` | `0` and nothing else. Without the fix: `setting up uid map: Permission denied` or `loopback: Failed RTM_NEWADDR`. |
-| 3 | **Repo.** Clone to `~/Work/private/looping-llama` **before** step 5: `link.sh` writes absolute paths, and settings and the `claude` function expect this path. | |
+| 3 | **Repo.** Clone to `~/Work/shared/looping-llama` **before** step 5: `link.sh` writes absolute paths, and settings and the `claude` function expect this path. | |
 | 4 | **SSH key.** All personas use `~/.ssh/id_ed25519_github`: `ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes -T git@github.com` | `Hi <login>! You've successfully authenticated…` |
 | 5 | **Link.** `./link.sh`, then again. `git config --global --get-regexp includeIf` | Run 1: `wrote …settings.json` per profile, the symlinks, `.envrc` files and `git: … identity` lines. Run 2: `up to date`, nothing new. One `includeIf` per mapped directory. |
 | 6 | **fish and direnv.** In `~/.config/fish/config.fish` (interactive block): `direnv hook fish \| source` and the `claude-a`/`claude-p` wrappers (see above). Then `direnv allow` in each mapped directory. | In `~/Work/elixir`: `direnv: export +CLAUDE_CONFIG_DIR +GH_CONFIG_DIR +PERSONA`. `functions -q claude claude-approve` succeeds. |
