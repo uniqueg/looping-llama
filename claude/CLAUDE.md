@@ -87,6 +87,7 @@ Draft GitHub release notes in exactly this format (same for every repo; never ch
 Tags and published releases can't be fixed afterwards (immutable releases, tag rulesets, package registries).
 
 - Never suggest a manual step in a running or failed release (e.g. creating or publishing a release by hand, re-tagging) until you have checked the repo settings that make steps irreversible and traced every remaining step of the workflow. Prefer reversible options (drafts, re-runs) or a new version, and say plainly what you haven't verified.
+- Citation metadata needs two PRs per release: before the tag, a release-prep PR sets the version and date in `CITATION.cff` (feather lane); after the release is published, a follow-up PR adds or updates the README's DOI badge and Citation section. Use the concept DOI, which always resolves to the latest version, so later releases need no update. Until a repo's first release with `CITATION.cff` has a DOI, its Citation section points to `CITATION.cff` only, without DOI or badge.
 - Before handing over the tag commands for a repo's first release, or after changes to its release workflow, dry-run the release: run the release scripts locally against the release commit, and test the workflow end to end in a fork on a test tag where the scripts can't cover it.
 
 ## Coding workflow
