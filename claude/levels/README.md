@@ -36,7 +36,7 @@ The names describe your role. A new level is a new folder (see
 | Answer automated reviewers on own PRs | allow | allow | ask | – |
 | Posting in your name: issues, PR comments, reviews | allow | ask | ask | ask (e.g., discussing an upstream issue) |
 | Human review before merging | skipped | **required**, per PR | **required**, per PR | – |
-| Merge own PRs (non-default branches; rulesets guard default branches) | allow | allow, after human review | ask, after human review | deny |
+| Merge own PRs (any branch, default branches included; never tags or releases) | allow | allow, after human review | ask, after human review | deny |
 | Read releases (`gh release view/list`) | allow | allow | ask | deny |
 | Edit release notes (`gh release edit`) | allow | ask | ask | deny |
 | Edit agent-stack config (CLAUDE.md, agents, hooks, levels, skills, workflows, settings) | ask | ask | ask | ask |
