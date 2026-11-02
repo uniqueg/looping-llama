@@ -77,7 +77,8 @@
       "Read(~/.ssh/**)",
       "Read(~/.gnupg/**)",
       "Read(~/.config/gh/**)",
-      "Read(~/.config/gh-*/**)",
+      "Read(~/.config/gh-academic/**)",
+      "Read(~/.config/gh-personal/**)",
       "Read(**/.env)",
       "Read(**/.env.*)"
     ]
@@ -101,7 +102,8 @@
         "~/.ssh",
         "~/.gnupg",
         "~/.config/gh",
-        "~/.config/gh-*",
+        "~/.config/gh-academic",
+        "~/.config/gh-personal",
         "~/**/.env",
         "~/**/.env.*"
       ],
