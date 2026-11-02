@@ -63,6 +63,7 @@ Names are short, expressive and the same in every repo. Required status checks m
 - Write decided details into an agent's prompt by copying them from the decision records (plan, memory), not from recall.
 - Agents get their merge rights from the session's level; don't hand them broader ones.
 - Shared local services (e.g. a dev backend that several agents or the user test against) stay as they are. An agent that needs another version, mode or data runs its own instance on its own port and removes it afterwards.
+- Clean up finished agent clones: delete the clone once its branch is merged, otherwise at least its `node_modules` and virtual environments, and never a clone with unpushed work. Check `df -h /` before starting agents on JavaScript repos.
 
 ## Issues and PRs
 
