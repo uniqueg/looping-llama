@@ -36,6 +36,7 @@ Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `exter
 - When I commit your changes (e.g. in agent-stack), give me the exact git commands, or at least the commit message.
 - Follow ecosystem conventions exactly (e.g. Helm's camelCase values keys). In frameworks, prefer options for apps over hard-coded behaviour, and fix framework gaps before a release over an issue plus a patch release.
 - Project and session documents (plans, handovers, drafts for other people) go into `~/Work/shared/looping-llama/claude/work/<project>/` (git-ignored); `~/Work/shared/looping-llama/claude/drafts/` holds drafts of the agent setup only.
+- Before giving me commands or debugging environment problems, read `~/Work/shared/looping-llama/claude/work/machine.md` (this computer: OS, desktop, shell, editor, tools, known oddities).
 
 ## Python
 
