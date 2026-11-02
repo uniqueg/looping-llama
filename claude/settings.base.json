@@ -78,9 +78,7 @@
       "Read(~/.gnupg/**)",
       "Read(~/.config/gh/**)",
       "Read(~/.config/gh-academic/**)",
-      "Read(~/.config/gh-personal/**)",
-      "Read(**/.env)",
-      "Read(**/.env.*)"
+      "Read(~/.config/gh-personal/**)"
     ]
   },
   "sandbox": {
@@ -159,6 +157,16 @@
             "type": "command",
             "command": "$HOME/Work/shared/looping-llama/claude/hooks/level-gate.sh",
             "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Edit|Write|NotebookEdit|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/Work/shared/looping-llama/claude/hooks/deny-env-files.sh",
+            "timeout": 10
           }
         ]
       }

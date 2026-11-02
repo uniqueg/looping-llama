@@ -44,6 +44,7 @@ claude/
   hooks/
     pre-push-checks.sh        PreToolUse: semgrep / ast-grep on the branch's files before `git push`
     level-gate.sh             PreToolUse: human-review gate before `gh pr merge`
+    deny-env-files.sh         PreToolUse: refuse file tools on .env and .env.* files, in every folder
   bin/claude-notify           ntfy push; also the Notification hook
   agents/                     review subagents -> ~/.claude-<profile>/agents
   skills/                     skills -> ~/.claude-<profile>/skills
@@ -221,6 +222,7 @@ the session's account).
 | `pre-push-checks.sh` hook | `claude/hooks/` | on `git push` / `git -C <dir> push`: semgrep (`$SEMGREP_CONFIGS`, default `p/python p/secrets`, plus the repo's `.semgrep.yml` / `.semgrep/`) and ast-grep (if the repo has `sgconfig.yml`) on the files changed since the default branch; blocks on findings, warns if a tool is missing |
 | Automated PR reviewers (Sourcery, Copilot) | GitHub | after `gh pr ready` (workflow step 9) |
 | `level-gate.sh` hook | `claude/hooks/` | on `gh pr merge`: `auto` passes; `reviewed`/`supervised` need human review of the current head commit; `external` and unknown levels are blocked; fails closed |
+| `deny-env-files.sh` hook | `claude/hooks/` | on Read, Edit, Write, NotebookEdit and Grep: refuses `.env` and `.env.*` files in every folder, also through symlinks; fails closed. Bash is covered by the sandbox's `denyRead`. Doesn't catch Grep on a whole directory |
 | Rulesets | GitHub, per repo | always: the real guard for default branches (status per repo: `NOTES.md`) |
 
 Skills and workflows:
