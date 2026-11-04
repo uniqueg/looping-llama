@@ -4,6 +4,7 @@
     "defaultMode": "auto",
     "allow": [
       "Bash(gh api *)",
+      "Bash(gh api repos/*/code-scanning/*)",
       "Bash(gh pr ready *)",
       "Bash(gh pr edit *)",
       "Bash(gh pr merge *)",
