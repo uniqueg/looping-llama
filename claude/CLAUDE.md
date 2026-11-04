@@ -8,7 +8,7 @@ Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `exter
 
 ## Hard rules
 
-- No clinical data and no data from Trusted Research Environments, ever. If a task seems to need such data, stop and ask.
+- No PID or other sensitive data (human health, human behaviour, defence and so on), ever, in any environment. Work with and towards TREs is fine: prototype with mock or synthetic data, or real non-sensitive data treated as sensitive. If a task seems to need sensitive data, stop and ask.
 - Never push to a repository's default branch, never force-push. Merge only as the session's autonomy level allows. Deliver work as a **draft** pull request from a feature branch (at the level `external`: a branch on my fork, no PR).
 - Never post comments, reviews or issues on my behalf unless the session's autonomy level allows it or I approved it in this session. Exception: on your own PRs, you may reply to and resolve review threads opened by automated reviewers (GitHub Copilot, Sourcery AI), as described in coding workflow step 9, unless the level says otherwise. Never publish releases; edit release notes only as the level allows (see "Release notes").
 - Never read, print, or copy secrets (API keys, tokens, SSH keys, `.env` files). If a task needs a credential, ask me.
