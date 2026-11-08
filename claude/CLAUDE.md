@@ -63,6 +63,7 @@ Names are short, expressive and the same in every repo. Required status checks m
 - Write decided details into an agent's prompt by copying them from the decision records (plan, memory), not from recall.
 - Agents don't post issues or comments on their own, because a compacted brief can be misunderstood. An agent checks and drafts, and passes the drafts to the main session. The main session reviews them against what I asked for and makes a recommendation. It confirms with me unless it's confident, and it errs on the side of caution, especially for anything public outside our org. Only then does it tell the agent to post. Excepted, in repos I administer: threads on an agent's own PRs, and issues for work the main session has already specified.
 - Agents get their merge rights from the session's level; don't hand them broader ones.
+- The auto-mode classifier denies subagents most writes to GitHub (merges, scripted issue and board changes), even where the level allows them. For bulk changes, an agent writes a script that is resumable (state file, skips what's done), stops at the first unexpected result and logs every change; the main session reviews it and runs it once I've approved. For merges, agents report "ready" and the main session merges.
 - Shared local services (e.g. a dev backend that several agents or the user test against) stay as they are. An agent that needs another version, mode or data runs its own instance on its own port and removes it afterwards.
 - Clean up finished agent clones: delete the clone once its branch is merged, otherwise at least its `node_modules` and virtual environments, and never a clone with unpushed work. Check `df -h /` before starting agents on JavaScript repos.
 
@@ -72,6 +73,10 @@ Names are short, expressive and the same in every repo. Required status checks m
 - A PR never addresses only part of an issue. If an issue is too big for one clean, small or moderate PR, split it first (see below).
 - Every issue or comment posted on my behalf in a repo outside `elixir-cloud-aai` and `uniqueg` ends with this line, using the model and version actually running: "This issue was written by Claude Code <model> <version> on behalf of @uniqueg." ("This comment" for comments.) Agents get this line in their briefs.
 - Issues are semantic and bite-sized: each one can be addressed in one clean, small or moderate PR. If that's not possible, create child issues and a parent issue that lists them (task list). If an issue by someone else (not me or you) is too big, create child issues yourself and link them to the original issue. The PR that closes the last open child also closes the parent.
+- GitHub API pitfalls when managing issues and boards:
+  - After `gh issue transfer`, board items and "blocked by" links follow with a delay: re-check for up to a minute before calling them lost.
+  - `gh api` prints the error body on stdout (e.g. "No parent issue found"): decide by the exit status, not by whether there's output.
+  - Never change a project's single-select options (e.g. Status) through the API: it replaces all options with new IDs and clears the field on every item. Ask me to change them in the UI. Project views can't be created through the API either: give me UI steps.
 - Give every issue you create the matching labels from those the repo already has (`gh label list --repo <owner>/<repo>`); don't create new labels. If the repo has label groups such as `type:`, `priority:`, `workload:` and `status:`, pick the best value from each group (`status:` only for open issues; update it when the status changes, e.g. `status: in progress` when work starts).
 - If an issue depends on other issues, record that with GitHub's issue dependencies ("blocked by", REST: `POST /repos/<owner>/<repo>/issues/<n>/dependencies/blocked_by` with the blocking issue's `id`; for new issues, `gh issue create --blocked-by <n|URL>` and `--parent <n|URL>`, also across repos), not only in the text, and set `status: blocked` while a blocker is open.
 - When a release is planned, give every issue it should contain the milestone `v<version>` (create the milestone if it's missing), including sub-issues and issues added later. Move issues that slip to the next milestone, and check before the release that the milestone has no open issues left.
@@ -90,6 +95,8 @@ Draft GitHub release notes in exactly this format (same for every repo; never ch
 
 Tags and published releases can't be fixed afterwards (immutable releases, tag rulesets, package registries).
 
+- Before proposing a version, list the repo's existing tags and release docs: an old tag in another scheme (e.g. `v0.2` against `0.2.0`) or a documented version floor can rule a version out.
+- Check that every environment a release workflow names still exists and is protected: GitHub creates a missing environment on the first run, unprotected and without its secrets.
 - Release only when a planned deployment needs it: releases cost agent time for reviews and prep and post PRs, and my hands-on time. Before proposing one, say in one line what the deployment gets from it and what's missing without it, read what's already published, and don't assume that a date from an older plan still holds.
 - Between releases, keep the `dev` heads of dependent repos compatible and test with Git heads. Release dependencies (e.g. plugins) right before the app that needs them.
 - Never suggest a manual step in a running or failed release (e.g. creating or publishing a release by hand, re-tagging) until you have checked the repo settings that make steps irreversible and traced every remaining step of the workflow. Prefer reversible options (drafts, re-runs) or a new version, and say plainly what you haven't verified.
@@ -100,7 +107,7 @@ Tags and published releases can't be fixed afterwards (immutable releases, tag r
 
 ## Coding workflow
 
-1. Work in an isolated worktree (sessions start with `claude -w <task-name>`) or a feature branch, never on the default branch. Agents work in their own clones in `~/Work/agent-clones/<repo>-<task>/`, not in worktrees of my checkout (the sandbox can leave a read-only `.git/config.lock` there) and not under `/tmp` (a reboot wipes `/tmp`); push early (draft PR) so unpushed work can't be lost.
+1. Work in an isolated worktree (sessions start with `claude -w <task-name>`) or a feature branch, never on the default branch. Agents work in their own clones in `~/Work/agent-clones/<repo>-<task>/`, cloned over SSH (`git@github.com:…`; HTTPS clones can't push), not in worktrees of my checkout (the sandbox can leave a read-only `.git/config.lock` there) and not under `/tmp` (a reboot wipes `/tmp`); push early (draft PR) so unpushed work can't be lost.
 2. Before changing code, find the project's **existing** checks: CI workflows (`.github/workflows/`), `Makefile`, `pyproject.toml`, `package.json`, `noxfile.py`/`tox.ini`, pre-commit config. Use those, don't invent new ones.
 3. A task is done only when those tests, linters, type checks and the build pass locally. If they cannot run (e.g. they need services), say exactly which ones did not run and why.
 4. Work test-driven, always, without being asked:
