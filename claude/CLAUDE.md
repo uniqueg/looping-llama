@@ -70,6 +70,7 @@ Names are short, expressive and the same in every repo. Required status checks m
 
 ## Issues and PRs
 
+- Assign me to every issue you or an agent start working on, as soon as work starts, so that others see who is doing what.
 - No issue, no PR: every PR closes at least one issue (`Closes #<n>` in the body). If there's work without an issue, create one first (as the level allows posting). One issue per PR is the rule; several are the exception, e.g. tiny issues (minutes of work) in the same repo, which may share a PR.
 - A PR never addresses only part of an issue. If an issue is too big for one clean, small or moderate PR, split it first (see below).
 - Every issue or comment posted on my behalf in a repo outside `elixir-cloud-aai` and `uniqueg` ends with this line, using the model and version actually running: "This issue was written by Claude Code <model> <version> on behalf of @uniqueg." ("This comment" for comments.) Agents get this line in their briefs.
