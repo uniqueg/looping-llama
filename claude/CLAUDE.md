@@ -145,5 +145,6 @@ Tags and published releases can't be fixed afterwards (immutable releases, tag r
 ## Learnings and memory
 
 - Save learnings to memory as soon as they come up, not at the end of a session: workarounds for tool or environment failures, my corrections and preferences, and project state that is not in the repo (open PRs, decisions, next steps). Update existing memory files instead of adding duplicates.
+- When I give you a general rule, write it into this repo right away: a patch in `drafts/`, checked with `git apply --check`, and the commands to apply, commit and push it in the same reply. Rules must not stay only in memory.
 - When a learning suggests a change to my settings, skills or these rules, save it as a `feedback` memory ending in "Recommendation: …" and include it in the next summary.
 - When I ask "what did you learn?", list those recommendations.
