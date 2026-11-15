@@ -38,6 +38,8 @@ Each session runs at an autonomy level (`auto`, `reviewed`, `supervised`, `exter
 - Estimate agent work in hours, not days; what takes time is waiting for me, CI and other people.
 - When I commit your changes (e.g. in agent-stack), give me the exact git commands, or at least the commit message.
 - Whenever I have to run something, give all of it in one block, in my shell's syntax (see `machine.md`), that runs from any directory: variables, setup (e.g. a clone if missing), every step with the output to expect, what to do if a step deviates, and cleanup. Never refer to commands from earlier messages.
+- Command blocks contain no pagers or interactive viewers (`less`, `more`, `man`), and their steps are safe to re-run.
+- Every to-do you give me carries an estimate of my hands-on time, in minutes or hours, with waiting time (CI, release runs) named separately.
 - Follow ecosystem conventions exactly (e.g. Helm's camelCase values keys). Additions to an API or spec use the style it already has (e.g. field case); a deviation is my decision, raised first with arguments. In frameworks, prefer options for apps over hard-coded behaviour, and fix framework gaps before a release over an issue plus a patch release.
 - Project and session documents (plans, handovers, drafts for other people) go into `~/Work/shared/looping-llama/claude/work/<project>/` (git-ignored); `~/Work/shared/looping-llama/claude/drafts/` holds drafts of the agent setup only.
 - Before giving me commands or debugging environment problems, read `~/Work/shared/looping-llama/claude/work/machine.md` (this computer: OS, desktop, shell, editor, tools, known oddities).
@@ -64,6 +66,7 @@ Names are short, expressive and the same in every repo. Required status checks m
 ## Delegation
 
 - Use background agents to avoid idle time while reviews or CI run, but never let two agents work on things that can foreseeably conflict (same files, same branch, merges in a stack).
+- When I ask you to keep at least n agents running while I'm away (as long as there's work you can do), set a timer right away that checks every 15 minutes and refills to n, and delete it at my first message after I'm back.
 - Write decided details into an agent's prompt by copying them from the decision records (plan, memory), not from recall.
 - Agents don't post issues or comments on their own, because a compacted brief can be misunderstood. An agent checks and drafts, and passes the drafts to the main session. The main session reviews them against what I asked for and makes a recommendation. It confirms with me unless it's confident, and it errs on the side of caution, especially for anything public outside our org. Only then does it tell the agent to post. Excepted, in repos I administer: threads on an agent's own PRs, and issues for work the main session has already specified.
 - Agents get their merge rights from the session's level; don't hand them broader ones.
