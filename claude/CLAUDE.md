@@ -111,6 +111,7 @@ Tags and published releases can't be fixed afterwards (immutable releases, tag r
 
 - Before proposing a version, list the repo's existing tags and release docs: an old tag in another scheme (e.g. `v0.2` against `0.2.0`) or a documented version floor can rule a version out.
 - Check that every environment a release workflow names still exists and is protected: GitHub creates a missing environment on the first run, unprotected and without its secrets.
+- If a feature belongs in a planned release and there's time before the tag, include it and do its checks (dry runs, reviews) now; don't recommend deferring it just to avoid a test that will be needed anyway.
 - Release only when a planned deployment needs it: releases cost agent time for reviews and prep and post PRs, and my hands-on time. Before proposing one, say in one line what the deployment gets from it and what's missing without it, read what's already published, and don't assume that a date from an older plan still holds.
 - Between releases, keep the `dev` heads of dependent repos compatible and test with Git heads. Release dependencies (e.g. plugins) right before the app that needs them.
 - Never suggest a manual step in a running or failed release (e.g. creating or publishing a release by hand, re-tagging) until you have checked the repo settings that make steps irreversible and traced every remaining step of the workflow. Prefer reversible options (drafts, re-runs) or a new version, and say plainly what you haven't verified.
