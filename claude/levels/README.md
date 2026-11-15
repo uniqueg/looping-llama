@@ -124,8 +124,8 @@ The same at every level (rules in the global CLAUDE.md, "Reporting"):
 - Claude reports only at a **dead end**, i.e. when it is blocked on every
   line of work or out of work, or when you ask ("catch me up"). Then it
   sends a short summary, and goes point by point on request.
-- In between, replies to background events are a single `·` (sign of
-  life).
+- In between, Claude doesn't reply to background events at all: silence
+  means work goes on. Only urgent problems break it.
 - Actions that would show a permission prompt wait on a list while other
   work is possible: a prompt blocks the whole session. They run at the dead
   end.
