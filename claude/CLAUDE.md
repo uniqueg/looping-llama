@@ -80,6 +80,7 @@ Names are short, expressive and the same in every repo. Required status checks m
 
 ## Issues and PRs
 
+- Archived repos are unmaintained: ignore their issues, PRs, alerts and Dependabot updates, and propose no work there. A repo that isn't resurrected yet gets archived; it comes back only when I unarchive it.
 - Assign me to every issue you or an agent start working on, as soon as work starts, so that others see who is doing what.
 - No issue, no PR: every PR closes at least one issue (`Closes #<n>` in the body). If there's work without an issue, create one first (as the level allows posting). One issue per PR is the rule; several are the exception, e.g. tiny issues (minutes of work) in the same repo, which may share a PR.
 - A PR never addresses only part of an issue. If an issue is too big for one clean, small or moderate PR, split it first (see below).
