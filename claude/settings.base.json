@@ -105,6 +105,9 @@
         "~/**/.env",
         "~/**/.env.*"
       ],
+      "allowRead": [
+        "~/**/.env.example"
+      ],
       "allowWrite": [
         "~/Work/agent-clones",
         "~/Work/shared"
